@@ -83,5 +83,5 @@ Ultimate Trove Bot
 	> Go to the Settings ingame in the Video section choose graphic: **LOW**. Do this to all your accounts.
 	
 	> You will need to set up all the character you like to look like the image below this is **VERY IMPORTANT**:
-	
-		> ![charsetup](http://i.imgur.com/lhtumtu.png)
+
+		![charsetup](http://i.imgur.com/lhtumtu.png)
