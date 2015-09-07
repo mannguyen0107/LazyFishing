@@ -2,7 +2,7 @@
 Ultimate Trove Bot
 ![preview](https://raw.githubusercontent.com/mannguyen0107/LazyFishing/master/preview.png)
 
-### Features:
+## Features:
 - Auto Fishing 
 
 	> Works in all type of liquid: Water, Lava and Chocolate.
@@ -17,7 +17,8 @@ Ultimate Trove Bot
 
 	> Auto Throw Boot (ATB) and Auto Decons Trophy Fish (ADF) after X minutes.
 
-### Changelog:
+
+## Changelog:
 - v1.4:
 
 	> * Fixed Remove Selected Account where the saved account folder doesn't get delete.
@@ -36,7 +37,8 @@ Ultimate Trove Bot
 	> * Improve the login system.
 	> * Redo the logic of handling window.
 
-### Installation:
+
+## Installation:
 1. Download and install AutoHotKey from the [official website](http://www.autohotkey.com/).
 
 	> AutoHotKey main program is needed to run the .ahk file. Running .ahk script file ratherr than the compiled .exe file to make sure that the script is cleanp and pure without any unintended modification.
@@ -84,4 +86,14 @@ Ultimate Trove Bot
 	
 	> You will need to set up all the character you like to look like the image below this is **VERY IMPORTANT**:
 
-		![charsetup](http://i.imgur.com/lhtumtu.png)
+	> ![charsetup](https://raw.githubusercontent.com/mannguyen0107/LazyFishing/master/charsetup.png)
+	
+9. Start fishing.
+
+	>  After setting up all your character you can now click on the button **Fishing Start (All Account)** to start fishing.
+	> If you want the Bot to Auto Throw Boot or Auto Decons Fish then click on the button **Boot and Decons Start**
+
+	
+## Hotkeys:
+> The hotkeys are all configurable via the Settings. You may change the keys by yourself.
+
