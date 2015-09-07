@@ -43,3 +43,8 @@ v1.4:
 - Fixed a bug where the bot try to throw items away while decons.
 - Added a Boot/Decons count down timer which will count down the time when it will start again.
 - The Bot now support glyph standalone version just change it in the Settings
+v1.5:
+- Clean up the script.
+- Added a check to see if the script is not run as admin then it will restart and run the script as admin.
+- Improve the login system.
+- Redo the logic of handling window.
