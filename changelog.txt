@@ -48,3 +48,7 @@ v1.5:
 - Added a check to see if the script is not run as admin then it will restart and run the script as admin.
 - Improve the login system.
 - Redo the logic of handling window.
+v1.5.1 (HotFix):
+- Fixed a bug where Settings doesn't save the Glyph Version info.
+v1.5.2 (HotFix):
+- Fixed the login system finally got it working correctly.
