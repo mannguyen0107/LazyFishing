@@ -224,7 +224,7 @@ EnvGet, LOCALAPPDATA, LOCALAPPDATA
 StandaloneDataPath := LOCALAPPDATA "\Glyph\"
 
 ; Check if setting of Glyph set to exit glyph after launch or not.
-IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, GlyphVer, Version
+IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
 if (GetGlyphVer = "Steam")
 {
 	IniRead, AfterLaunch, %LoadGlyphPath%/GlyphClient.cfg, Glyph, AfterLaunch
@@ -297,23 +297,28 @@ Return
 ; -------------------------------------------------------------------------
 ; ~Start~ Button Launch GlyphClient.exe.
 LaunchGlyph:
+	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
 	IniRead, LoadGlyphFolder, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
 	
-	Process, Exist, GlyphClient.exe
-	if (ErrorLevel = 0)
+	if (GetGlyphVer = "Steam")
 	{
-		Run, GlyphClient.exe, %LoadGlyphFolder%, UseErrorLevel
-		if ErrorLevel = ERROR
+		IfNotExist, %LoadGlyphFolder%/Cache
 		{
-			MsgBox, 16, LAUNCH GLYPH, Please check the folder path again!
+			MsgBox, 16, LAUNCH GLYPH CLIENT, Please check the folder path again. This path is for Standalone version!
 			Return
 		}
-		WinWait, Glyph
+		LaunchGlyph(LoadGlyphFolder)
 	}
-	else 
+	else
 	{
-		WinActivate, Glyph
+		IfExist, %LoadGlyphFolder%/Cache
+		{
+			MsgBox, 16, LAUNCH GLYPH CLIENT, Please check the folder path again. This path is for Steam version!
+			Return
+		}
+		LaunchGlyph(LoadGlyphFolder)
 	}
+	
 Return
 ; ~End~ Button Launch GlyphClient.exe.
 ; -------------------------------------------------------------------------
@@ -322,7 +327,7 @@ Return
 ; -------------------------------------------------------------------------
 ; ~Start~ Button Save Current Login.
 SaveLogin:
-	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, GlyphVer, Version
+	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
 	IniRead, LoadGlyphFolder, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
 	
 	if (GetGlyphVer = "Steam")
@@ -391,11 +396,9 @@ Return
 ; -------------------------------------------------------------------------
 ; ~Start~ Button Start Selected Account / Start All Account and related functions.
 
-
-
 ; Button Start Selected Account.
 StartSelected:
-	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, GlyphVer, Version
+	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
 	IniRead, LoadGlyphFolder, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
 	
 	GuiControlGet, SelectedAccount,, %HAccountList%
@@ -413,7 +416,7 @@ Return
 ; Button Start All Account.
 SAA:
 StartAll:
-	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, GlyphVer, Version
+	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
 	IniRead, LoadGlyphFolder, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
 	
 	Loop, %A_ScriptDir%/data/savedlogins\*, 2
@@ -446,23 +449,28 @@ AutoLogin(GlyphFolder, LoginName, GlyphVer)
 		IniWrite, %LoginName%, %StandaloneDataPath%/GlyphClient.cfg, Glyph, Login
 	}
 	
-	Process, Exist, GlyphClient.exe
-	if (ErrorLevel = 0)
-	{
-		Run, GlyphClient.exe, %GlyphFolder%, UseErrorLevel
-		if ErrorLevel = ERROR
-		{
-			MsgBox, 16, START SELECTED ACCOUNT, Please check the folder path again!
-			Return
-		}
-		WinWait, Glyph
-	}
+	LaunchGlyph(GlyphFolder)
 		
 	sleep, 5000
 	ClickPlay()
 	Sleep, 2000
 	WindowsHandle(LoginName)
 	sleep, 2000
+}
+ 
+LaunchGlyph(GlyphPath)
+{
+	Process, Exist, GlyphClient.exe
+	if (ErrorLevel = 0)
+	{
+		Run, GlyphClient.exe, %GlyphPath%, UseErrorLevel
+		if ErrorLevel = ERROR
+		{
+			MsgBox, 16, LAUNCH GLYPH, Please check the folder path again!
+			Return
+		}
+		WinWait, Glyph
+	}
 }
  
 AccountListReload()
