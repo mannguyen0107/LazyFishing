@@ -46,3 +46,34 @@ Ultimate Trove Bot
 	> You may find the Download ZIP button on the repo page. Extract the .zip file and you can find the files below:
 	
 	* **LazyFishing.AHK**
+
+		> This is the main script of the bot.
+		
+	* **FishingClient.AHK**
+
+		> This is the fishing script.
+		
+	* A Folder **data**
+
+		> This folder contain all the necessary files that the bot needs.
+		
+3. Run **LazyFishing.AHK** as Administrator.
+4. Go into the bot Settings and choose the Glyph Version that you are using.
+
+	> This is very important that you choose the correct Glyph Version.
+
+5. Choose the GLyph Folder Path.
+
+	> Please make sure that you choose the glyph folder path that is appropriate with the Glyph Version you choose in Settings.
+
+6. Add your accounts to the Bot.
+
+	> 1. You need to launch the GlyphClient.exe of the Glyph Version that you chose earlier in Settings or just click the button **Launch Glyph Client**.
+	
+	> 2. Login to the account that you want to add.
+	
+	> 3. Click on **Save Current Login**.
+	
+7. Click on **Start All Accounts**.
+
+	> The Bot will automatically login to all the accounts you added please be patient and wait for it to launch all of them.
