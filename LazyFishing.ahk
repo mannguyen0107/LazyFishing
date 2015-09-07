@@ -594,7 +594,7 @@ SaveButtonSetting:
 		IniWrite, %FishingTime%, %A_ScriptDir%/data/configs/fishingconfig.ini, Time Between Session, FishingSessionDelay
 		IniWrite, %BootDropMethod%, %A_ScriptDir%/data/configs/launcherconfig.ini, Boot Drop Method, BootDropMethod
 		IniWrite, %ChangeWindowName%, %A_ScriptDir%/data/configs/launcherconfig.ini, Game Window, ChangeName
-		IniWrite, %GlyphVer%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, GlyphVer, Version
+		IniWrite, %GlyphVer%, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
 		IniWrite, %SAA_HK%, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, StartAllAccount
 		IniWrite, %FStart_HK%, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, FishingStart
 		IniWrite, %FStop_HK%, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, FishingStop
