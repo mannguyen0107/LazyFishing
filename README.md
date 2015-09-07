@@ -1,0 +1,2 @@
+# LazyFishing
+Ultimate Trove Bot
