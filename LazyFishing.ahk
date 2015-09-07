@@ -18,6 +18,19 @@ WinSet, TransColor, White, loading
 
 
 ; -------------------------------------------------------------------------
+; ~Start~ Declares Global vars.
+Global BotVer := "1.5"
+Global BDActive
+Global DefaultGPath := "C:\Program Files (x86)\Steam\SteamApps\common\Trove"
+Global FoundDat
+Global ClientWidth
+Global ClientHeight
+Global StandaloneDataPath
+; ~End~ Declares Global vars
+; -------------------------------------------------------------------------
+
+
+; -------------------------------------------------------------------------
 ; ~Start~ Creates config files at first launch.
 IfNotExist, %A_ScriptDir%/data/savedlogins
 {
@@ -112,19 +125,6 @@ IfNotExist, %A_ScriptDir%/data/configs/bootdeconsconfig.ini
 	}
 }
 ; ~End~ Creates config files at first launch.
-; -------------------------------------------------------------------------
-
-
-; -------------------------------------------------------------------------
-; ~Start~ Declares Global vars.
-Global BotVer := "1.4"
-Global BDActive
-Global DefaultGPath := "C:\Program Files (x86)\Steam\SteamApps\common\Trove"
-Global FoundDat
-Global ClientWidth
-Global ClientHeight
-Global StandaloneDataPath
-; ~End~ Declares Global vars
 ; -------------------------------------------------------------------------
 
 
@@ -797,7 +797,6 @@ Return
 
 Decons(PID)
 {
-	
 	IniRead, GetDWX, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, DeconsWindowX
 	IniRead, GetDWY, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, DeconsWindowY
 	
