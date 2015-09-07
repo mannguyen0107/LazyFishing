@@ -1,0 +1,45 @@
+v1.0:
+- 
+v1.1:
+- Added Setting Button, this is where you can change the Address and the delay time between each boot drop and decons session.
+- My bot now support up to 20 accounts.
+- Fixed boot drop, I hope it now working for you guys.
+- Reorganized bot folder.
+- All .ini files will now created when you first launcher the "TroveLauncher.ahk".
+v1.2:
+- Add fishing session delay time, you can change the delay in Setting.
+- Fixed a bug where the bot won't decons a stack of fish.
+- Modified the way the bot detect game window for dropping boot and decons trophy fish.
+- The bot now name your game window of each account according to the account name you set for each account.
+- Fixed a bug where bot sometime get glitch and keep pressing "F" when your computer get lag or CPU overload.
+v1.3:
+- Added default glyph folder path (C:\Program Files (x86)\Steam\SteamApps\common\Trove).
+- Modified Boot/Decons so when you started a new account you don't have to restart the Boot/Decon to make it work with the new account you just opened.
+- Bot will now notice you once it started the selected account.
+- Redesign the Settings GUI.
+- Modified the fishing script to try to fix the random bug where bot keep pressing F when it glitch (I'm still working on this not sure if the change I made would fix it 100%).
+- Starting to documented my script so that others developers can easily understand incase they want to improve my code (WIP).
+- Merge the fishing script and boot/decons script into the main bot script to prevent memory leak from happening (Again I'm not sure if this would fix the memory leak 100%).
+- Added a changelog file in the bot folder.
+- Make changes to the way the bot run fishing script, it will now support as many clients as you want.
+- Reorganize the bot folder.
+- As the bot growing I decided to give the bot name: "LazyFishing".
+- Bot will now skip empty slot which doesnt have fish in it when decons.
+- Improve messagebox system.
+- Added Hotkey for some of the function, find out more about this in the Settings.
+- Added an alternative to dropping boot, find out more about this in the Settings.
+- Added a place to edit the pixel color of empty slot in Settings. Empty slot pixel color is used to improve the way the bot decons or dropping boot.
+- Added loading image at start while the bot is getting ready to be use.
+- Modified the login system it should works perfect now.
+- Remove Add New Account and Edit Selected Account.
+- Disable game window change name for this version as I need to fix a few things for it.
+- Added button for Launch Glyph Client so you guys can login and save login account info, don't have to find the glyph folder and run it.
+v1.4:
+- Fixed Remove Selected Account where the saved account folder doesn't get delete.
+- Added a check to see if the account you are adding is already exist.
+- Added a messagebox to tell you if your glyph folder path is wrong when you try to save current login account.
+- Fixed a bug where fishing bot stop after caught 1 fish.
+- Fixed a bug where bot skip some fishes when decons.
+- Fixed a bug where the bot try to throw items away while decons.
+- Added a Boot/Decons count down timer which will count down the time when it will start again.
+- The Bot now support glyph standalone version just change it in the Settings
