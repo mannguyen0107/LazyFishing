@@ -36,7 +36,7 @@ Loop
 	IniRead, Break, %A_ScriptDir%/data/configs/fishingconfig.ini, Break, Break
 	if (Break = 1)
 	{
-		break
+		break 
 	}
 	else 
 	{
@@ -53,7 +53,6 @@ Loop
 		If (Catch = 1)
 		{	
 			break
-			Goto, Stop
 		}
 		else
 		{
@@ -86,8 +85,6 @@ Loop
 	IniRead, GetSessionTime, %A_ScriptDir%/data/configs/fishingconfig.ini, Time Between Session, FishingSessionDelay
 	Sleep, %GetSessionTime%
 }
-
-Stop:
 ExitApp
 
 HumanSleep() {

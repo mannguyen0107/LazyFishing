@@ -52,3 +52,5 @@ v1.5.1 (HotFix):
 - Fixed a bug where Settings doesn't save the Glyph Version info.
 v1.5.2 (HotFix):
 - Fixed the login system finally got it working correctly.
+v1.5.3 HotFix:
+- Fixed a bug where fishing bot randomly stop.
