@@ -44,9 +44,9 @@ Loop
 	
 	Count := Count +1
 	HumanPressButton("f", PID)
-	Sleep, 15000
+	Sleep, 10000
 	Catch := 0
-	TimeCheck := 25
+	TimeCheck := 30
 	
 	Loop  
 	{
