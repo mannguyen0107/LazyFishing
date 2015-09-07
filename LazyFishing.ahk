@@ -25,6 +25,11 @@ IfNotExist, %A_ScriptDir%/data/savedlogins
 	FileCreateDir, %A_ScriptDir%/data/savedlogins
 }
 
+IfNotExist, %A_ScriptDir%/data/configs
+{
+	FileCreateDir, %A_ScriptDir%/data/configs
+}
+
 IfNotExist, %A_ScriptDir%/data/configs/launcherconfig.ini
 {
 ;Default Settings for Launcher.
