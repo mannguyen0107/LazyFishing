@@ -77,3 +77,11 @@ Ultimate Trove Bot
 7. Click on **Start All Accounts**.
 
 	> The Bot will automatically login to all the accounts you added please be patient and wait for it to launch all of them.
+	
+8. Setting up your charracter.
+
+	> Go to the Settings ingame in the Video section choose graphic: **LOW**. Do this to all your accounts.
+	
+	> You will need to set up all the character you like to look like the image below this is **VERY IMPORTANT**:
+	
+		> ![charsetup](http://i.imgur.com/lhtumtu.png)
