@@ -5,9 +5,17 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 #WinActivateForce
 SetKeyDelay, 0, 2
 
+IF NOT A_IsAdmin
+{
+   Run *RunAs "%A_ScriptFullPath%"
+   ExitApp
+}
+
 IniRead, LoadAddress, %A_ScriptDir%/data/configs/fishingconfig.ini, Memory, Address
-IniRead, PID, %A_ScriptDir%/data/configs/fishingconfig.ini, PID, pid%1%
-IniRead, Handle, %A_ScriptDir%/data/configs/fishingconfig.ini, Handle, handle%1%
+
+IniRead, PID, %A_ScriptDir%/data/savedlogins/%1%/%1%.ini, PID, PID
+IniRead, Handle, %A_ScriptDir%/data/savedlogins/%1%/%1%.ini, Handle, Handle
+
 IniRead, Break, %A_ScriptDir%/data/configs/fishingconfig.ini, Break, Break
 ; IniRead, GetChangeName, %A_ScriptDir%/data/configs/launcherconfig.ini, Game Window, ChangeName
 
