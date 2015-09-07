@@ -46,7 +46,7 @@ Loop
 	HumanPressButton("f", PID)
 	Sleep, 15000
 	Catch := 0
-	TimeCheck := 20
+	TimeCheck := 25
 	
 	Loop  
 	{
