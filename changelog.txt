@@ -52,5 +52,9 @@ v1.5.1 (HotFix):
 - Fixed a bug where Settings doesn't save the Glyph Version info.
 v1.5.2 (HotFix):
 - Fixed the login system finally got it working correctly.
-v1.5.3 HotFix:
+v1.5.3 (HotFix):
 - Fixed a bug where fishing bot randomly stop.
+v1.5.4 (HotFix):
+- Change the time when fishing bot check for readmemory to increase the CPU performance.
+v1.5.5 (HotFix):
+- Added a better way to detect if the bot is stuck when fishing it will restart itself.
