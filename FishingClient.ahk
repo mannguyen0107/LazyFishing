@@ -132,27 +132,27 @@ GetAddressChoco(PID, Base, Address)
 GetFishingStateWaterAddress(PID, Base, Address)
 {
  pointerBase := base + Address
- y1 := ReadMemory(pointerBase,PID)
- y2 := ReadMemory(y1 + 0x5d8,PID)
- y3 := ReadMemory(y2 + 0x7d4,PID)
+ y1 := ReadMemory(PID, pointerBase)
+ y2 := ReadMemory(PID, y1 + 0x5d8)
+ y3 := ReadMemory(PID, y2 + 0x7d4)
  Return FishingStateWater := (y3 + 0x5a0)
 }
  
 GetFishingStateChocoAddress(PID, Base, Address)
 {
  pointerBase := base + Address
- y1 := ReadMemory(pointerBase,PID)
- y2 := ReadMemory(y1 + 0x5d8,PID)
- y3 := ReadMemory(y2 + 0x7d8,PID)
+ y1 := ReadMemory(PID, pointerBase)
+ y2 := ReadMemory(PID, y1 + 0x5d8)
+ y3 := ReadMemory(PID, y2 + 0x7d8)
  Return FishingStateChoco := (y3 + 0x684)
 }
  
 GetFishingStateLavaAddress(PID, Base, Address)
 {
  pointerBase := base + Address
- y1 := ReadMemory(pointerBase,PID)
- y2 := ReadMemory(y1 + 0x5d8,PID)
- y3 := ReadMemory(y2 + 0x7d8,PID)
+ y1 := ReadMemory(PID, pointerBase)
+ y2 := ReadMemory(PID, y1 + 0x5d8)
+ y3 := ReadMemory(PID, y2 + 0x7d8)
  Return FishingStateLava := (y3 + 0x1e4)
 }
 

@@ -58,3 +58,5 @@ v1.5.4 (HotFix):
 - Change the time when fishing bot check for readmemory to increase the CPU performance.
 v1.5.5 (HotFix):
 - Added a better way to detect if the bot is stuck when fishing it will restart itself.
+v1.5.6 (HotFix):
+- Fixed FishingState ReadMemory.
