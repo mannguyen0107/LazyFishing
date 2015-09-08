@@ -29,59 +29,55 @@ Base := getProcessBaseAddress()
 WaterAddress := GetAddressWater(PID, Base, LoadAddress) 
 LavaAddress := GetAddressLava(PID, Base, LoadAddress) 
 ChocoAddress := GetAddressChoco(PID, Base, LoadAddress)
+StateWaterAddress := GetFishingStateWaterAddress(PID, Base, Address)
+StateLavaAddress := GetFishingStateLavaAddress(PID, Base, Address)
+StateChocoAddress := GetFishingStateChocoAddress(PID, Base, Address)
 
-Count := 0
 Loop
 {
-	IniRead, Break, %A_ScriptDir%/data/configs/fishingconfig.ini, Break, Break
+    IniRead, Break, %A_ScriptDir%/data/configs/fishingconfig.ini, Break, Break
 	if (Break = 1)
 	{
 		break 
 	}
-	else 
-	{
-	}
 	
-	Count := Count +1
 	HumanPressButton("f", PID)
-	Sleep, 10000
-	Catch := 0
-	TimeCheck := 30
-	
-	Loop  
+	Timer := 0 
+       
+	While Timer = 0
 	{
-		If (Catch = 1)
-		{	
-			break
-		}
-		else
+		Loop   
 		{
-			If (TimeCheckN = TimeCheck)
-			{
-				HumanPressButton("f", PID)
-				LureCount := 0
-			}
-			else
-			{
-			}
-			
 			CaughtWater := ReadMemory(PID, WaterAddress)
 			CaughtLava := ReadMemory(PID, LavaAddress)
 			CaughtChoco := ReadMemory(PID, ChocoAddress)
 			If (CaughtWater = 1 or CaughtLava = 1 or CaughtChoco = 1)
 			{
 				HumanPressButton("f", PID)
-				RandomSleep(2000, 3500)
-				Catch := 1
+				RandomSleep(500, 1500)
+				Break
 			}
-			else 
+			if Timer >= 45
 			{
-				TimeCheckN := TimeCheckN +1
-				Sleep, 1000
+				StateWater := ReadMemory(PID, StateWaterAddress)
+				StateLava := ReadMemory(PID, StateLavaAddress)
+				StateChoco := ReadMemory(PID, StateChocoAddress)
+				If (StateWater = 1 or StateLava = 1 or StateChoco = 1)
+				{
+					HumanPressButton("f", PID)
+					break
+				}
+				else
+				{
+					break
+				}
 			}
+			Sleep, 1000
+			Timer++
 		}
 	}
-	
+	Timer := 0
+   
 	IniRead, GetSessionTime, %A_ScriptDir%/data/configs/fishingconfig.ini, Time Between Session, FishingSessionDelay
 	Sleep, %GetSessionTime%
 }
@@ -132,6 +128,33 @@ GetAddressChoco(PID, Base, Address)
 	y3 := ReadMemory(PID, y2 + 0xe4)
 	Return ChocoAddress := (y3 + 0x2c0)
 }  
+
+GetFishingStateWaterAddress(PID, Base, Address)
+{
+ pointerBase := base + Address
+ y1 := ReadMemory(pointerBase,PID)
+ y2 := ReadMemory(y1 + 0x5d8,PID)
+ y3 := ReadMemory(y2 + 0x7d4,PID)
+ Return FishingStateWater := (y3 + 0x5a0)
+}
+ 
+GetFishingStateChocoAddress(PID, Base, Address)
+{
+ pointerBase := base + Address
+ y1 := ReadMemory(pointerBase,PID)
+ y2 := ReadMemory(y1 + 0x5d8,PID)
+ y3 := ReadMemory(y2 + 0x7d8,PID)
+ Return FishingStateChoco := (y3 + 0x684)
+}
+ 
+GetFishingStateLavaAddress(PID, Base, Address)
+{
+ pointerBase := base + Address
+ y1 := ReadMemory(pointerBase,PID)
+ y2 := ReadMemory(y1 + 0x5d8,PID)
+ y3 := ReadMemory(y2 + 0x7d8,PID)
+ Return FishingStateLava := (y3 + 0x1e4)
+}
 
 getProcessBaseAddress()
 {
