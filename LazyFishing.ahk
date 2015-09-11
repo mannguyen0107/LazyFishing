@@ -1,11 +1,12 @@
+﻿#SingleInstance Force
 #NoEnv  ; Recommended for performance and compatibility with future AutoHotkey releases.
-#Warn  ; Enable warnings to assist with detecting common errors.
+; #Warn  ; Enable warnings to assist with detecting common errors.
 SendMode Input  ; Recommended for new scripts due to its superior speed and reliability.
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
-#SingleInstance Force
 CoordMode, Mouse, Relative
-CoordMode, Pixel, Relative
+EnvGet, LOCALAPPDATA, LOCALAPPDATA
 
+; Check if the script is run as Admin or not
 IF NOT A_IsAdmin
 {
    Run *RunAs "%A_ScriptFullPath%"
@@ -19,13 +20,16 @@ WinSet, TransColor, White, loading
 
 ; -------------------------------------------------------------------------
 ; ~Start~ Declares Global vars.
-Global BotVer := "1.5"
+Global BotVer := "1.6"
 Global BDActive
-Global DefaultGPath := "C:\Program Files (x86)\Steam\SteamApps\common\Trove"
-Global FoundDat
+Global DefaultGlyphPath := "C:\Program Files (x86)\Steam\SteamApps\common\Trove"
 Global ClientWidth
 Global ClientHeight
-Global StandaloneDataPath
+Global StandaloneDataPath := LOCALAPPDATA . "\Glyph\"
+Global LoadAddress
+Global BotList := Object() ;The array where the clients are added.
+Global CoordSlot := Object() ; Array for coordinate slot
+Global CheckSetTimer := 0
 ; ~End~ Declares Global vars
 ; -------------------------------------------------------------------------
 
@@ -42,87 +46,38 @@ IfNotExist, %A_ScriptDir%/data/configs
 	FileCreateDir, %A_ScriptDir%/data/configs
 }
 
-IfNotExist, %A_ScriptDir%/data/configs/launcherconfig.ini
+IfNotExist, %A_ScriptDir%/data/log
 {
-;Default Settings for Launcher.
-	IniWrite, 0, %A_ScriptDir%/data/configs/launcherconfig.ini, AccountNum, Account_Num
-	IniWrite, %A_ScriptDir%, %A_ScriptDir%/data/configs/launcherconfig.ini, WorkingDir, Dir
-	IniWrite, %BotVer%, %A_ScriptDir%/data/configs/launcherconfig.ini, LazyFishing, Version
-	IniWrite, %DefaultGPath%, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
-	IniWrite, Image Search, %A_ScriptDir%/data/configs/launcherconfig.ini, Boot Drop Method, BootDropMethod
-	IniWrite, No, %A_ScriptDir%/data/configs/launcherconfig.ini, Game Window, ChangeName
-	IniWrite, Steam, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
-	IniWrite, F1, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, StartAllAccount
-	IniWrite, F2, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, FishingStart
-	IniWrite, F3, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, FishingStop
-	IniWrite, F4, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, BootDeconsStart
-	IniWrite, F5, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, BootDeconsStop
+	FileCreateDir, %A_ScriptDir%/data/log
 }
 
-IfNotExist, %A_ScriptDir%/data/configs/fishingconfig.ini
+IfNotExist, %A_ScriptDir%/data/configs/loginsystem.ini
 {
-;Default Settings for Fishing.
-	IniWrite, 0x00A682D0, %A_ScriptDir%/data/configs/fishingconfig.ini, Memory, Address
-	IniWrite, 0, %A_ScriptDir%/data/configs/fishingconfig.ini, Break, Break
-	IniWrite, 480, %A_ScriptDir%/data/configs/fishingconfig.ini, Client, Width
-	IniWrite, 360, %A_ScriptDir%/data/configs/fishingconfig.ini, Client, Height
-	IniWrite, 0, %A_ScriptDir%/data/configs/fishingconfig.ini, Account Number, AccNum
-	IniWrite, 2000, %A_ScriptDir%/data/configs/fishingconfig.ini, Time Between Session, FishingSessionDelay
+	;Default Settings for Login System.
+	IniWrite, %DefaultGlyphPath%, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphFolderPath, Path
+	IniWrite, Steam, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphVer, Version
+	IniWrite, 480, %A_ScriptDir%/data/configs/loginsystem.ini, ClientSize, Width
+	IniWrite, 360, %A_ScriptDir%/data/configs/loginsystem.ini, ClientSize, Height
 }
 
-IfNotExist, %A_ScriptDir%/data/configs/bootdeconsconfig.ini
+IfNotExist, %A_ScriptDir%/data/configs/fishingsystem.ini
 {
-;Default Settings for Boot and Decons.
-	IniWrite, 0x4c3000, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, Empty Slot Pixel Color, Color
-	IniWrite, 600000, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, Time Between Session, BootDeconsTime
-	IniWrite, 360, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, BaseX ; Relative 360, Client 352
-	IniWrite, 158, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, BaseY ; Relative 158, Client 127
-	IniWrite, 80, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, BtnAcceptX
-	IniWrite, 310, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, BtnAcceptY
-	IniWrite, 210, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, BtnYesX
-	IniWrite, 200, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, BtnYesY
-	IniWrite, 70, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, DeconsWindowX
-	IniWrite, 220, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, DeconsWindowY
-	Loop, 20
-	{
-		IniRead, GetBaseX, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, BaseX
-		IniRead, GetBaseY, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, BaseY
-		
-		BaseX_1 := BaseX_6 := BaseX_11 := BaseX_16 := GetBaseX
-		BaseX_2 := BaseX_7 := BaseX_12 := BaseX_17 := BaseX_1+20 ;Relative 20, Client 20
-		BaseX_3 := BaseX_8 := BaseX_13 := BaseX_18 := BaseX_2+21 ;Relative 21, Client 21
-		BaseX_4 := BaseX_9 := BaseX_14 := BaseX_19 := BaseX_3+21 ;Relative 21, Client 21
-		BaseX_5 := BaseX_10 := BaseX_15 := BaseX_20 := BaseX_4+21 ;Relative 21, Client 21
-		
-		if (a_index <= 5)
-		{
-			BaseX := BaseX_%a_index%
-			BaseY := GetBaseY
-			IniWrite, %BaseX%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_X
-			IniWrite, %BaseY%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_Y
-		}
-		else if (a_index >5 and a_index <= 10)
-		{
-			BaseX := BaseX_%a_index%
-			BaseY := GetBaseY+20
-			IniWrite, %BaseX%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_X
-			IniWrite, %BaseY%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_Y
-		}
-		else if (a_index >10 and a_index <= 15)
-		{
-			BaseX := BaseX_%a_index%
-			BaseY := GetBaseY+40
-			IniWrite, %BaseX%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_X
-			IniWrite, %BaseY%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_Y
-		}
-		else if (a_index >15 and a_index <= 20)
-		{	
-			BaseX := BaseX_%a_index%
-			BaseY := GetBaseY+60
-			IniWrite, %BaseX%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_X
-			IniWrite, %BaseY%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_Y
-		}
-	}
+	;Default Settings for Fishing.
+	IniWrite, 0x00A43F04, %A_ScriptDir%/data/configs/fishingsystem.ini, MemoryAddress, Address
+}
+
+IfNotExist, %A_ScriptDir%/data/configs/bdsystem.ini
+{
+	;Default Settings for Login System.
+	IniWrite, 600000, %A_ScriptDir%/data/configs/bdsystem.ini, SessionDelay, Time
+	IniWrite, Ctrl + F1, %A_ScriptDir%/data/configs/bdsystem.ini, HotKey, Stop
+	IniWrite, Image Search, %A_ScriptDir%/data/configs/bdsystem.ini, DropMethod, Method
+	IniWrite, 360, %A_ScriptDir%/data/configs/bdsystem.ini, SlotsCoord, BaseX ; Relative 360, Client 352
+	IniWrite, 158, %A_ScriptDir%/data/configs/bdsystem.ini, SlotsCoord, BaseY ; Relative 158, Client 127
+	IniWrite, 80, %A_ScriptDir%/data/configs/bdsystem.ini, DeconsCoord, BtnAcceptX
+	IniWrite, 310, %A_ScriptDir%/data/configs/bdsystem.ini, DeconsCoord, BtnAcceptY
+	IniWrite, 210, %A_ScriptDir%/data/configs/bdsystem.ini, DeconsCoord, BtnYesX
+	IniWrite, 200, %A_ScriptDir%/data/configs/bdsystem.ini, DeconsCoord, BtnYesY
 }
 ; ~End~ Creates config files at first launch.
 ; -------------------------------------------------------------------------
@@ -132,83 +87,84 @@ IfNotExist, %A_ScriptDir%/data/configs/bootdeconsconfig.ini
 ; ~Start~ GUI Creation.
 
 ; Main GUI.
-Gui, Main:Font, S11 Q4, Verdana
-Gui, Main:Add, Text, x10 y10 w140 h20 , Glyph Folder Path:
-Gui, Main:Add, Button, x650 y10 w60 h20 gChooseGlyphButton, ...
+Gui, Main:Default
+Gui, Main:Add, Picture, x5 y15 w550 h95 , %A_ScriptDir%/data/img/launcher/banner.png
+Gui, Main:Font, S10 Q4, Verdana
+Gui, Main:Add, Tab2, x5 y110 w540 h460 -Wrap -Background, Log Screen||Login Bot|Fishing Bot|Boot/Decons Bot
+Gui, Main:Add, Tab2, x5 y570 w540 h70 -Wrap -Background
+
+; Log Screen Tab
+Gui, Main:Tab, 1, 1
+Gui, Main:Add, Edit, x15 y140 w520 h420 vConsole
+
+; Login Bot Tab
+Gui, Main:Tab, 2, 1
+Gui, Main:Add, ListView, x15 y140 w320 h420 NoSortHdr Grid -Multi AltSubmit vAccountList gAccountList, Login Account|Fishing Mode
+Gui, Main:Add, Button, x345 y140 w190 h40 gSaveLogin, Save Current Login
+Gui, Main:Add, Button, x345 y190 w190 h40 gRemoveAcc, Remove Selected Account
+Gui, Main:Add, Button, x345 y280 w190 h40 gLaunchGlyph, Launch Glyph
+Gui, Main:Add, Button, x345 y330 w190 h40 gLaunchSelected, Launch Selected Account
+Gui, Main:Add, Button, x345 y380 w190 h40 gLaunchAll, Launch All Account
+Gui, Main:Add, Button, x345 y520 w190 h40 gLoginSetting, Config Glyph Path/Version
+
+; Fishing Bot Tab
+Gui, Main:Tab, 3, 1
+Gui, Main:Add, ListView, x15 y140 w520 h300 NoSortHdr Grid vFishingList, Account Name|Reel In|Fish In|Fishing Status
+
+Gui, Main:Add, GroupBox, x335 y450 w200 h100 , Setting
+Gui, Main:Add, Text, x345 y480 w60 h20 +Left, Address:
+Gui, Main:Add, Edit, x415 y480 w110 h20 +Center vAddress
+Gui, Main:Add, Button, x405 y515 w60 h20 gFishingSettingSave, Save
+
+Gui, Main:Add, Button, x15 y457 w120 h40 gFishingStartAll, Start All
+Gui, Main:Add, Button, x15 y507 w120 h40 gFishingStopAll, Stop All
+Gui, Main:Add, Button, x145 y457 w180 h40 gFishingStartSelected, Start Selected Account
+Gui, Main:Add, Button, x145 y507 w180 h40 gFishingStopSelected, Stop Selected Account
+
+; Boot/Decons Bot Tab
+Gui, Tab, 4, 1
+Gui, Main:Add, ListView, x15 y140 w520 h260 NoSortHdr Grid AltSubmit vBDList gBDList, Account Name|Boot Drop Mode|Decons Mode
+
+hotkeylist := "Ctrl + Numpad0|Ctrl + Numpad1|Ctrl + Numpad2|Ctrl + Numpad3|Ctrl + Numpad4|Ctrl + Numpad5|Ctrl + Numpad6|Ctrl + Numpad7|Ctrl + Numpad8|Ctrl + Numpad9|Ctrl + F1|Ctrl + F2|Ctrl + F3|Ctrl + F4|Ctrl + F5|Ctrl + F6|Ctrl + F7|Ctrl + F8|Ctrl + F9|Ctrl + F10|Ctrl + F11|Ctrl + F12"
+
+Gui, Main:Add, GroupBox, x285 y410 w250 h150 , Setting
+Gui, Main:Add, Text, x300 y435 w100 h20 +Left, Session Delay:
+Gui, Main:Add, Edit, x410 y435 w110 h20 +Center vBDDelay
+Gui, Main:Add, Text, x300 y467 w100 h20 +Left, Drop Method:
+Gui, Main:Add, ComboBox, x410 y465 w110 vBootDropMethod hwndHBootDropMethod, Image Search|Manual
+Gui, Main:Add, Text, x300 y502 w100 h20 +Left, Stop Hotkey:
+Gui, Main:Add, ComboBox, x410 y500 w110 vHK_BDStop hwndHHK_BDStop, %hotkeylist%
+Gui, Main:Add, Button, x385 y533 w60 h20 gBDSettingSave, Save
+
+Gui, Main:Add, Button, x15 y417 w120 h40 gBDStart, Start
+Gui, Main:Add, Button, x145 y417 w120 h40 gBDStop, Stop
+
+Gui, Main:Add, GroupBox, x15 y470 w250 h90, Next Session Start In
+Gui, Main:Font, S35 Q4, Verdana
+Gui, Main:Add, Text, x30 y490 h20 vBDCDTime, 00:00:00
 
 Gui, Main:Font, S10 Q4, Verdana
-Gui, Main:Add, Edit, x160 y10 w480 h20 vGlyphPathDisplay
-Gui, Main:Add, Button, x10 y40 w200 h40 gLaunchGlyph, Launch Glyph Client
-Gui, Main:Add, Button, x10 y90 w200 h40 gSaveLogin, Save Current Login
-Gui, Main:Add, Button, x10 y140 w200 h40 gRemoveAcc, Remove Selected Account
-Gui, Main:Add, ListBox, x220 y67 w280 h220 vAccountName hwndHAccountList
-Gui, Main:Add, Button, x10 y270 w200 h40 gStartSelected, Start Selected Account
-Gui, Main:Add, Button, x10 y320 w200 h40 gStartAll, Start All Accounts
-Gui, Main:Add, Button, x510 y40 w200 h40 gInstruction, Instruction
-Gui, Main:Add, Button, x510 y90 w200 h40 gSetting, Settings
-Gui, Main:Add, Button, x510 y170 w200 h40 gFishingStart, Fishing Start (All Account)
-Gui, Main:Add, Button, x510 y220 w200 h40 gFishingStop, Fishing Stop (All Account)
-Gui, Main:Add, Button, x510 y270 w200 h40 gBootDeconsStart, Boot and Decons Start
-Gui, Main:Add, Button, x510 y320 w200 h40 gBootDeconsStop, Boot and Decons Stop
+Gui, Main:Add, StatusBar
+SB_SetParts(20, 450, 80)
+SB_SetIcon(A_ScriptDir . "/data/img/main.ico", 1, 1) 
+SB_SetText("By: TaeJim", 3)
 
-Gui, Main:Add, GroupBox, x220 y287 w280 h70, Timer
-Gui, Main:Add, Text, x230 y307 h20 vBDCountDown, Boot/Decons Start In:
-Gui, Main:Add, Text, x230 y330 h20 vShutDown, Auto Shutdown In:
-Gui, Main:Add, Text, x430 y307 h20 vBDCDTime, 00:00:00
-Gui, Main:Add, Text, x430 y330 h20 vSDTime, 00:00:00
+Gui, Tab
+Gui, Main:Add, Button, x50 y585 w120 h40 gCleanLogFolder, Clean Log Folder
+Gui, Main:Add, Button, x215 y585 w120 h40, Read Me
+Gui, Main:Add, Button, x380 y585 w120 h40 gDonate, Donate
 
-Gui, Main:Font, S12 Q4 Bold Underline, Verdana
-Gui, Main:Add, Text, x285 y40 w150 h20 +Center, Account List
+; Login Setting GUI.
+Gui, LoginSetting:Font, S10 Q4, Verdana
+Gui, LoginSetting:Add, Text, x10 y23 w140 h20, Glyph Version:
+Gui, LoginSetting:Add, ComboBox, x140 y20 w140 vGlyphVer hwndHGlyphVer, Steam|Standalone
+Gui, LoginSetting:Add, Text, x10 y60 w140 h20, Glyph Folder Path:
+Gui, LoginSetting:Add, Edit, x140 y60 w260 h20 vGlyphPathDisplay
+Gui, LoginSetting:Add, Button, x410 y60 w60 h20 gLoginSettingBrowsePath, Browse
 
-; Settings GUI.
-Gui, Setting:Font, S10 Q4, Verdana
-Gui, Setting:Add, Text, x10 y40 w180 h20 +Left, Address:
-Gui, Setting:Add, Text, x10 y70 w180 h20 +Left, Empty Slot Color:
-Gui, Setting:Add, Text, x10 y100 w180 h20 +Left, BootDecons Session Delay:
-Gui, Setting:Add, Text, x10 y130 w180 h20 +Left, Fishing Session Delay:
-Gui, Setting:Add, Text, x10 y162 w180 h20 +Left, Boot Drop Method:
-Gui, Setting:Add, Text, x10 y232 w180 h20 +Left, Glyph Version:
-Gui, Setting:Add, Text, x10 y262 w180 h20 +Left, Game Window Naming:
-Gui, Setting:Add, Text, x10 y292 w180 h20 +Left, Start All Account Hotkey:
-Gui, Setting:Add, Text, x10 y322 w180 h20 +Left, Fishing Start Hotkey:
-Gui, Setting:Add, Text, x10 y352 w180 h20 +Left, Fishing Stop Hotkey:
-Gui, Setting:Add, Text, x10 y382 w180 h20 +Left, BootDecons Start Hotkey:
-Gui, Setting:Add, Text, x10 y412 w180 h20 +Left, BootDecons Stop Hotkey:
+Gui, LoginSetting:Add, Button, x100 y100 w120 h30 gLoginSettingSave, Save
+Gui, LoginSetting:Add, Button, x270 y100 w120 h30 gLoginSettingCancel, Close
 
-
-Gui, Setting:Add, Text, x210 y293 w40 h20 +Left, Ctrl +
-Gui, Setting:Add, Text, x210 y323 w40 h20 +Left, Ctrl +
-Gui, Setting:Add, Text, x210 y353 w40 h20 +Left, Ctrl +
-Gui, Setting:Add, Text, x210 y383 w40 h20 +Left, Ctrl +
-Gui, Setting:Add, Text, x210 y413 w40 h20 +Left, Ctrl +
-
-hotkeylist := "Numpad0|Numpad1|Numpad2|Numpad3|Numpad4|Numpad5|Numpad6|Numpad7|Numpad8|Numpad9|F1|F2|F3|F4|F5|F6|F7|F8|F9|F10|F11|F12"
-
-Gui, Setting:Add, Edit, x210 y40 w140 h20 +Center vAddress
-Gui, Setting:Add, Edit, x210 y70 w75 h20 +Center vPixelColor
-Gui, Setting:Add, Button, x290 y69 w60 h22 gUpdatePixel, Update
-Gui, Setting:Add, Edit, x210 y100 w140 h20 +Center vBDTime
-Gui, Setting:Add, Edit, x210 y130 w140 h20 +Center vFishingTime
-Gui, Setting:Add, ComboBox, x210 y160 w140 vBootDropMethod hwndHBootDropMethod, Image Search|Manual
-Gui, Setting:Add, ComboBox, x210 y230 w140 vGlyphVer hwndHGlyphVer, Steam|Standalone
-Gui, Setting:Add, ComboBox, x210 y260 w140 vChangeWindowName hwndHChangeWindowName, Yes|No
-Gui, Setting:Add, ComboBox, x250 y290 w100 vSAA_HK hwndHSAA_HK,, %hotkeylist%
-Gui, Setting:Add, ComboBox, x250 y320 w100 vFStart_HK hwndHFStart_HK, %hotkeylist%
-Gui, Setting:Add, ComboBox, x250 y350 w100 vFStop_HK hwndHFStop_HK, %hotkeylist%
-Gui, Setting:Add, ComboBox, x250 y380 w100 vBDStart_HK hwndHBDStart_HK, %hotkeylist%
-Gui, Setting:Add, ComboBox, x250 y410 w100 vBDStop_HK hwndHBDStop_HK, %hotkeylist%
-
-Gui, Setting:Add, Picture, x360 y103 w14 h14 vSettingHelp1 gHelp, %A_ScriptDir%/data/img/launcher/help.png
-Gui, Setting:Add, Picture, x360 y133 w14 h14 vSettingHelp2 gHelp, %A_ScriptDir%/data/img/launcher/help.png
-Gui, Setting:Add, Picture, x360 y165 w14 h14 vSettingHelp3 gHelp, %A_ScriptDir%/data/img/launcher/help.png
-Gui, Setting:Add, Picture, x360 y265 w14 h14 vSettingHelp4 gHelp, %A_ScriptDir%/data/img/launcher/help.png
-
-Gui, Setting:Add, Button, x60 y460 w100 h30 gSaveButtonSetting, Save
-Gui, Setting:Add, Button, x230 y460 w100 h30 gCancelButtonSetting, Cancel
-
-Gui, Setting:Font, S12 Q4 Bold Underline, Verdana
-Gui, Setting:Add, Text, x128 y10 w130 h20 +Center, Game Settings
-Gui, Setting:Add, Text, x128 y200 w130 h20 +Center, Bot Settings
 ; ~End~ GUI Creation.
 ; -------------------------------------------------------------------------
 
@@ -216,21 +172,15 @@ Gui, Setting:Add, Text, x128 y200 w130 h20 +Center, Bot Settings
 ; -------------------------------------------------------------------------
 ; ~Start~ GUI preparation.
 
-; Get Glyph Path from config.
-IniRead, LoadGlyphPath, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
+IniRead, GetGlyphPath, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphFolderPath, Path
 
-; Get Glyph standalone saved account info folder
-EnvGet, LOCALAPPDATA, LOCALAPPDATA
-StandaloneDataPath := LOCALAPPDATA "\Glyph\"
-
-; Check if setting of Glyph set to exit glyph after launch or not.
-IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
+IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphVer, Version
 if (GetGlyphVer = "Steam")
 {
-	IniRead, AfterLaunch, %LoadGlyphPath%/GlyphClient.cfg, Glyph, AfterLaunch
+	IniRead, AfterLaunch, %GetGlyphPath%/GlyphClient.cfg, Glyph, AfterLaunch
 	if (AfterLaunch != "Exit")
 	{
-		IniWrite, Exit, %LoadGlyphPath%/GlyphClient.cfg, Glyph, AfterLaunch
+		IniWrite, Exit, %GetGlyphPath%/GlyphClient.cfg, Glyph, AfterLaunch
 	}
 }
 else
@@ -242,102 +192,123 @@ else
 	}
 }
 
-; Display Glyph folder path and Accounts' info into Main GUI.
-Gui, Main:Submit, nohide
-GuiControl, Main:, GlyphPathDisplay, %LoadGlyphPath%
+LoadingCoordOut()
 
-GuiControl, Main:, AccountName, |
-Global FolderList := 
-	loop, %A_ScriptDir%\data\savedlogins\*, 2 
-FolderList .= A_LoopFileName . "|"
-GuiControl, Main:, AccountName, %FolderList%
+AccountListReload()
+Gui, Main:ListView, AccountList
+LV_ModifyCol(1, 215)
+LV_ModifyCol(1, "Center")
+LV_ModifyCol(2, "AutoHdr")
+LV_ModifyCol(2, "Center")
 
-; Get all the hotkey from config.
-IniRead, SAAHK, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, StartAllAccount
-IniRead, FStartHK, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, FishingStart
-IniRead, FStopHK, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, FishingStop
-IniRead, BDStartHK, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, BootDeconsStart
-IniRead, BDStopHK, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, BootDeconsStop
+IniRead, LoadAddress, %A_ScriptDir%/data/configs/fishingsystem.ini, MemoryAddress, Address
+GuiControl, Main:, Address, %LoadAddress%
+FishingListReload()
+Gui, Main:ListView, FishingList
+LV_ModifyCol(1, 250)
+LV_ModifyCol(2, 70)
+LV_ModifyCol(3, 80)
+LV_ModifyCol(1, "Center")
+LV_ModifyCol(2, "Center")
+LV_ModifyCol(3, "Center")
+LV_ModifyCol(4, "Center")
+LV_ModifyCol(4, "AutoHdr")
 
-; Set hotkey to appropriate function.
-HotKey, ^%SAAHK%, SAA, On
-HotKey, ^%FStartHK%, FStart, On
-HotKey, ^%FStopHK%, FStop, On
-HotKey, ^%BDStartHK%, BDStart, On
-HotKey, ^%BDStopHK%, BDStop, On
+IniRead, GetBDDelay, %A_ScriptDir%/data/configs/bdsystem.ini, SessionDelay, Time
+GuiControl, Main:, BDDelay, %GetBDDelay%
+IniRead, GetDropMethod, %A_ScriptDir%/data/configs/bdsystem.ini, DropMethod, Method
+GuiControl, Disable, BootDropMethod
+ControlSetText, , %GetDropMethod%, ahk_id %HBootDropMethod%
+IniRead, BDStopHK,  %A_ScriptDir%/data/configs/bdsystem.ini, HotKey, Stop
+GetHotKey := StrSplit(BDStopHK, " + ") 
+@BDStopHK := GetHotKey[2]
+ControlSetText, , %BDStopHK%, ahk_id %HHK_BDStop%
+HotKey, ^%@BDStopHK%, HKBDStop, On
+BDListReload()
+Gui, Main:ListView, BDList
+LV_ModifyCol(1, 290)
+LV_ModifyCol(1, "Center")
+LV_ModifyCol(2, "AutoHdr")
+LV_ModifyCol(2, "Center")
+LV_ModifyCol(3, "Center")
+LV_ModifyCol(3, "AutoHdr")
 
-; Get Width and Height of Client (used to resize later).
-IniRead, ClientWidth, %A_ScriptDir%/data/configs/fishingconfig.ini, Client, Width
-IniRead, ClientHeight, %A_ScriptDir%/data/configs/fishingconfig.ini, Client, Height
-
-IniWrite, %BotVer%, %A_ScriptDir%/data/configs/launcherconfig.ini, LazyFishing, Version
+IniRead, ClientWidth, %A_ScriptDir%/data/configs/loginsystem.ini, ClientSize, Width
+IniRead, ClientHeight, %A_ScriptDir%/data/configs/loginsystem.ini, ClientSize, Height
 
 SplashImage, Off
-
-; Show Main GUI.
-Gui, Main:Show, x150 y100 w720 h370, LazyFishing v%BotVer%
-Return
 ; ~End~ GUI preparation.
 ; -------------------------------------------------------------------------
 
+; Show Main GUI.
+Gui, Main:Show, x0 y0 h670 w550, LazyFishing v%BotVer%
 
-; -------------------------------------------------------------------------
-; ~Start~ Button Choose glyph folder path.
-ChooseGlyphButton:
-	Gui, Submit, nohide
-	FileSelectFolder, GlyphFolder, , , Please select the Glyph folder:
-	GuiControl, Main:, GlyphPathDisplay, %GlyphFolder%
-	GuiControlGet, GlyphPathDisplay
-	IniWrite, %GlyphPathDisplay%, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
+FormatTime, TimeStamp, A_Now, dd.MM.yyyy-HH:mm:ss
+StringReplace, LogTimeStamp, TimeStamp, :, ., 1
+LogPath := % A_ScriptDir . "\data\log\" . LogTimeStamp . ".txt"
+log("Started LazyFishing Bot v" . BotVer, TimeStamp, LogPath)
 Return
-; ~End~ Button Choose glyph folder path.
-; -------------------------------------------------------------------------
+
+
+
+
 
 
 ; -------------------------------------------------------------------------
-; ~Start~ Button Launch GlyphClient.exe.
-LaunchGlyph:
-	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
-	IniRead, LoadGlyphFolder, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
-	
-	if (GetGlyphVer = "Steam")
+; ~Start~ Buttons don't belong to any tabs.
+
+; Button Clean Log Folder.
+CleanLogFolder:
+	log("Cleaning log folder.", TimeStamp, LogPath)
+	Loop, %A_ScriptDir%\data\log\*
 	{
-		IfNotExist, %LoadGlyphFolder%/Cache
+		CurrentLogFileName := LogTimeStamp . ".txt"
+		if (A_LoopFileName = CurrentLogFileName)
 		{
-			MsgBox, 16, LAUNCH GLYPH CLIENT, Please check the folder path again. This path is for Standalone version!
-			Return
+			Continue
 		}
-		LaunchGlyph(LoadGlyphFolder)
-	}
-	else
-	{
-		IfExist, %LoadGlyphFolder%/Cache
+		else
 		{
-			MsgBox, 16, LAUNCH GLYPH CLIENT, Please check the folder path again. This path is for Steam version!
-			Return
+			FileDelete, %A_ScriptDir%\data\log\%A_LoopFileName%
 		}
-		LaunchGlyph(LoadGlyphFolder)
 	}
-	
+	log("Log folder is cleaned.", TimeStamp, LogPath)
 Return
-; ~End~ Button Launch GlyphClient.exe.
+
+; Button Donate.
+Donate:
+	Run, https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=HKA9MDHXMQ7HS , , Max
+Return
+; ~End~ Buttons don't belong to any tabs.
 ; -------------------------------------------------------------------------
 
 
+
+
+
+
 ; -------------------------------------------------------------------------
-; ~Start~ Button Save Current Login.
+; ~Start~ Login System.
+
+; Button Save Current Login.
 SaveLogin:
-	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
-	IniRead, LoadGlyphFolder, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
+	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphVer, Version
+	IniRead, GetGlyphPath, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphFolderPath, Path
+	
+	; SB_SetText("Saving current login account...", 2)
+	log("Saving current login account...", TimeStamp, LogPath)
 	
 	if (GetGlyphVer = "Steam")
 	{
-		IfNotExist, %LoadGlyphFolder%\Cache\*.dat
+		IfNotExist, %GetGlyphPath%\Cache\*.dat
 		{
-			MsgBox, 16, SAVE CURREN LOGIN, Please check the folder path again!
+			; SB_SetText("Error: fail to save current login (See log for more details).", 2)
+			log("Fail to save current login account: please login to save the account.", TimeStamp, LogPath)
+			; SB_SetText("", 2)
+			;MsgBox, 16, SAVE CURREN LOGIN, Please check the folder path again!
 			Return
 		}
-		IniRead, GetLoginName, %LoadGlyphFolder%/GlyphClient.cfg, Glyph, Login
+		IniRead, GetLoginName, %GetGlyphPath%/GlyphClient.cfg, Glyph, Login
 	}
 	else
 	{
@@ -346,85 +317,228 @@ SaveLogin:
 	
 	IfExist, %A_ScriptDir%/data/savedlogins/%GetLoginName%
 	{
-		MsgBox, 64, SAVE CURREN LOGIN, The account %GetLoginName% is already exist!
+		; SB_SetText("Error: The account " . GetLoginName . " is already existed.", 2)
+		log("Fail to save current login account: the account " . GetLoginName . " is already existed.", TimeStamp, LogPath)
+		; SB_SetText("", 2)
+		;MsgBox, 64, SAVE CURREN LOGIN, The account %GetLoginName% is already exist!
 		Return
 	}
 	
 	IfNotExist, %A_ScriptDir%/data/savedlogins/%GetLoginName%
 	{
+		log("Creating " . GetLoginName . " folder to save the account info.", TimeStamp, LogPath)
 		FileCreateDir, %A_ScriptDir%/data/savedlogins/%GetLoginName%
 	}
 	
 	if (GetGlyphVer = "Steam")
 	{
-		FileCopy, %LoadGlyphFolder%\Cache\*.dat, %A_ScriptDir%/data/savedlogins/%GetLoginName%
+		log("Copying .dat file of " . GetLoginName . " to it's folder.", TimeStamp, LogPath)
+		FileCopy, %GetGlyphPath%\Cache\*.dat, %A_ScriptDir%/data/savedlogins/%GetLoginName%
 	}
 	else
 	{
+		log("Copying .dat file of " . GetLoginName . " to it's folder.", TimeStamp, LogPath)
 		FileCopy, %StandaloneDataPath%\Cache\*.dat, %A_ScriptDir%/data/savedlogins/%GetLoginName%
 	}
 	
+	FishingMode(GetLoginName)
 	AccountListReload()
+	FishingListReload()
+	BDMode(GetLoginName)
+	BDListReload()
 	
-	MsgBox, 64, SAVE LOGIN ACCOUNT, Saved %GetLoginName% to the Accounts List!
+	; SB_SetText("Saved " . GetLoginName . " to the Accounts List.", 2)
+	log("Saved " . GetLoginName . " to the Accounts List.", TimeStamp, LogPath)
+	; SB_SetText("", 2)
+	;MsgBox, 64, SAVE LOGIN ACCOUNT, Saved %GetLoginName% to the Accounts List!
 Return
-; ~End~ Button Save Current Login.
-; -------------------------------------------------------------------------
 
-
-; -------------------------------------------------------------------------
-; ~Start~ Button Remove Selected Account.
+; Button Remove Selected Account.
 RemoveAcc:
-	GuiControlGet, SelectedAccount,, %HAccountList%
-	
-	if (SelectedAccount = "")
-	{
-		MsgBox, 64, REMOVE SELECTED ACCOUNT, You haven't select an account you want to delete.
+	Gui, Main:ListView, AccountList
+	; Gui, Main:Submit, Nohide
+	FocusedRowNumber := LV_GetNext(0, "F")  ; Find the focused row.
+	if not FocusedRowNumber  ; No row is focused.
+    {
+		; SB_SetText("Error: Fail to remove selceted account (See log for details).", 2)
+		log("Fail to removed the selected account: you haven't select an account to remove yet.", TimeStamp, LogPath)
+		; SB_SetText("", 2)
 		Return
+	}
+	LV_GetText(LoginName, FocusedRowNumber, 1)
+	MsgBox, 36, REMOVE SELECTED ACCOUNT, Are you sure you want to delete %LoginName% from the account list?
+	ifMsgBox Yes
+	{
+		FileRemoveDir, %A_ScriptDir%/data/savedlogins/%LoginName%, 1
+		AccountListReload()
+		BDListReload()
+		FishingListReload()
+		LV_Delete(FocusedRowNumber)  ; Clear the row from the ListView.
+		; SB_SetText("Removed " . LoginName . " from the Accounts List.", 2)
+		log("Removed " . LoginName . " from the Accounts List.", TimeStamp, LogPath)
+		; SB_SetText("", 2)
 	}
 	else
 	{
-		FileRemoveDir, %A_ScriptDir%/data/savedlogins/%SelectedAccount%, 1
-		AccountListReload()
-		MsgBox, 64, REMOVE SELECTED ACCOUNT, Removed %SelectedAccount% from the Accounts List!
-	}
-Return
-; ~End~ Button Remove Selected Account.
-; -------------------------------------------------------------------------
-
-
-; -------------------------------------------------------------------------
-; ~Start~ Button Start Selected Account / Start All Account and related functions.
-
-; Button Start Selected Account.
-StartSelected:
-	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
-	IniRead, LoadGlyphFolder, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
-	
-	GuiControlGet, SelectedAccount,, %HAccountList%
-	if (SelectedAccount = "")
-	{
-		MsgBox, 64, START SELECTED ACCOUNT, You need to select an account to start!
 		Return
 	}
-	
-	AutoLogin(LoadGlyphFolder, SelectedAccount, GetGlyphVer)
-
-	MsgBox, 64, START SELECTED ACCOUNT, Successfully started %SelectedAccount% account!
+	;MsgBox, 64, REMOVE SELECTED ACCOUNT, Removed %LoginName% from the Accounts List!
 Return
 
-; Button Start All Account.
-SAA:
-StartAll:
-	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
-	IniRead, LoadGlyphFolder, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
+; Button Launch Glyph Client.
+LaunchGlyph:
+	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphVer, Version
+	IniRead, GetGlyphPath, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphFolderPath, Path
+	
+	; SB_SetText("Launching Glyph Client...", 2)
+	log("Launching Glyph Client...", TimeStamp, LogPath)
+	
+	if (GetGlyphVer = "Steam")
+	{
+		IfNotExist, %GetGlyphPath%/Cache
+		{
+			; SB_SetText("Error: Fail to launch Glyph Client (See log for details).", 2)
+			log("Fail to launch Glyph Client: please check the folder path again, this path is for Standalone version.", TimeStamp, LogPath)
+			; SB_SetText("", 2)
+			;MsgBox, 16, LAUNCH GLYPH CLIENT, Please check the folder path again. This path is for Standalone version!
+			Return
+		}
+		LaunchGlyph(GetGlyphPath)
+	}
+	else
+	{
+		IfExist, %GetGlyphPath%/Cache
+		{
+			; SB_SetText("Error: Fail to launch Glyph Client (See log for details).", 2)
+			log("Fail to launch Glyph Client: please check the folder path again, this path is for Steam version.", TimeStamp, LogPath)
+			; SB_SetText("", 2)
+			;MsgBox, 16, LAUNCH GLYPH CLIENT, Please check the folder path again. This path is for Steam version!
+			Return
+		}
+		LaunchGlyph(GetGlyphPath)
+	}
+	; SB_SetText("Glyph Client has lauched.", 2)
+	log("Glyph Client has launched.", TimeStamp, LogPath)
+	; SB_SetText("", 2)
+Return
+
+; Button Launch Selected Account.
+LaunchSelected:
+	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphVer, Version
+	IniRead, GetGlyphPath, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphFolderPath, Path
+	
+	Gui, Main:ListView, AccountList
+	FocusedRowNumber := LV_GetNext(0, "F")  ; Find the focused row.
+	if not FocusedRowNumber  ; No row is focused.
+    {
+		; SB_SetText("Error: Fail to launch selected account (See log for details).", 2)
+		log("Fail to launch the selected account: you haven't select an account to launch yet.", TimeStamp, LogPath)
+		; SB_SetText("", 2)
+		;MsgBox, 64, REMOVE SELECTED ACCOUNT, You haven't select an account you want to delete.
+		Return
+	}
+	LV_GetText(LoginName, FocusedRowNumber, 1)
+	; SB_SetText("Launching " . LoginName . " ...", 2)
+	log("Launching " . LoginName . " ...", TimeStamp, LogPath)
+	AutoLogin(GetGlyphPath, LoginName, GetGlyphVer)
+	; SB_SetText("Successfully launched " . LoginName, 2)
+	log("Successfully launched " . LoginName, TimeStamp, LogPath)
+	; SB_SetText("", 2)
+	;MsgBox, 64, START SELECTED ACCOUNT, Successfully started %LoginName% account!
+Return
+
+; Button Launch All Account.
+LaunchAll:
+	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphVer, Version
+	IniRead, GetGlyphPath, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphFolderPath, Path
+	
+	; SB_SetText("Launching all the accounts...", 2)
+	log("Launching all the accounts...", TimeStamp, LogPath)
 	
 	Loop, %A_ScriptDir%/data/savedlogins\*, 2
 	{
-		AutoLogin(LoadGlyphFolder, A_LoopFileName, GetGlyphVer)
+		log("Launching account number " . A_Index . ": " . A_LoopFileName, TimeStamp, LogPath)
+		AutoLogin(GetGlyphPath, A_LoopFileName, GetGlyphVer)
+		log("Account number " . A_Index . ": " . A_LoopFileName . " has lauched", TimeStamp, LogPath)
 	}
 
-	MsgBox, 64, START ALL ACCOUNT, Successfully started all accounts!
+		; SB_SetText("Error: Fail to launch all accounts (See log for details).")
+		; log("Fail to launch all accounts: you don't have any saved account.", TimeStamp, LogPath)
+		; Return
+
+	; SB_SetText("Successfully launched all accounts.", 2)
+	log("Successfully launched all accounts.", TimeStamp, LogPath)
+	; SB_SetText("", 2)
+	;MsgBox, 64, START ALL ACCOUNT, Successfully started all accounts!
+Return
+
+; Button Config Glyph Path/Version
+LoginSetting:
+	Gui, LoginSetting:Submit, nohide
+	Gui, LoginSetting:Show, x127 y87 h140 w480, Config Glyph Path/Version
+	
+	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphVer, Version
+	IniRead, GetGlyphPath, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphFolderPath, Path
+	
+	ControlSetText, , %GetGlyphVer%, ahk_id %HGlyphVer%
+	GuiControl, LoginSetting:, GlyphPathDisplay, %GetGlyphPath%
+Return
+
+LoginSettingBrowsePath:
+	Gui LoginSetting:+OwnDialogs  ; Forces user to dismiss the following dialog before using main window.
+	Gui, LoginSetting:Submit, nohide
+	FileSelectFolder, GlyphFolder, , , Please select the Glyph folder:
+	if not GlyphFolder  ; The user canceled the dialog.
+	{
+		Return
+	}
+	GuiControl, LoginSetting:, GlyphPathDisplay, %GlyphFolder%
+	GuiControlGet, GlyphPathDisplay
+	IniWrite, %GlyphPathDisplay%, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphFolderPath, Path
+Return
+
+LoginSettingSave:
+	GuiControlGet, GlyphVer
+	GuiControlGet, GlyphPathDisplay
+	
+	IniWrite, %GlyphVer%, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphVer, Version
+	IniWrite, %GlyphPathDisplay%, %A_ScriptDir%/data/configs/loginsystem.ini, GlyphFolderPath, Path
+	
+	Gui, LoginSetting:Hide
+	MsgBox, 64, LOGIN BOT SETTINGS, Settings are successfully saved.
+Return
+
+LoginSettingGuiClose:
+LoginSettingCancel:
+	Gui, LoginSetting:Hide
+Return
+
+AccountList:
+	Gui, Main:ListView, AccountList
+	if A_GuiEvent = DoubleClick
+	{
+		FocusedRowNumber := LV_GetNext(0, "F")  ; Find the focused row.
+		if not FocusedRowNumber  ; No row is focused.
+		{
+			Return
+		}
+		LV_GetText(LoginName, FocusedRowNumber, 1)
+		LV_GetText(FishingTF, FocusedRowNumber, 2)  ; Get the text from the row's first field.
+		if (FishingTF = "On")
+		{
+			NewFMode := "Off"
+			IniWrite, %NewFMode%, %A_ScriptDir%/data/savedlogins/%LoginName%/Fishing.ini, Fishing, Mode
+			ModifyListView("AccountList", LoginName, 2, NewFMode)
+			log("Fishing is turned off for " . LoginName, TimeStamp, LogPath)
+		}
+		else
+		{
+			NewFMode := "On"
+			IniWrite, %NewFMode%, %A_ScriptDir%/data/savedlogins/%LoginName%/Fishing.ini, Fishing, Mode
+			ModifyListView("AccountList", LoginName, 2, NewFMode)
+			log("Fishing is turned on for " . LoginName, TimeStamp, LogPath)
+		}
+	}
 Return
 
 AutoLogin(GlyphFolder, LoginName, GlyphVer)
@@ -453,8 +567,8 @@ AutoLogin(GlyphFolder, LoginName, GlyphVer)
 		
 	sleep, 5000
 	ClickPlay()
-	Sleep, 2000
-	WindowsHandle(LoginName)
+	Sleep, 5000
+	SetWinTitleAtLaunch(LoginName)
 	sleep, 2000
 }
  
@@ -475,11 +589,14 @@ LaunchGlyph(GlyphPath)
  
 AccountListReload()
 {
-	GuiControl, Main:, AccountName, |
-	FolderList := 
-		loop, %A_ScriptDir%\data\savedlogins\*, 2 
-	FolderList .= A_LoopFileName . "|"
-    GuiControl, Main:, AccountName, %FolderList%
+	Gui, Main:Default
+	Gui, Main:ListView, AccountList
+	LV_Delete()
+	loop, %A_ScriptDir%\data\savedlogins\*, 2
+	{
+		IniRead, FishingMode, %A_ScriptDir%/data/savedlogins/%A_LoopFileName%/Fishing.ini, Fishing, Mode
+		LV_Add("", A_LoopFileName, FishingMode)
+	}
 	Return
 }
 
@@ -502,256 +619,530 @@ ClickPlay()
 	Return
 }
 
-WindowsHandle(LoginName)
+SetWinTitleAtLaunch(LoginName)
 {
-	WinActivate, Trove
-	WinWaitActive, Trove
+	Global ClientWidth
+	Global ClientHeight
 	
-	WinGet, active_id, ID, Trove
-	vHandle := active_id
-	WinGet, vPID, PID, ahk_id %vHandle%
-	vPID := vPID
-	IfNotExist, %A_ScriptDir%/data/savedlogins/%LoginName%/%LoginName%.ini
+	WinSetTitle, Trove, , %LoginName% 
+	WinMove, %LoginName%, , , , %ClientWidth%, %ClientHeight%
+}
+; ~End~ Login System.
+; -------------------------------------------------------------------------
+
+
+
+
+
+
+; -------------------------------------------------------------------------
+; ~Start~ Fishing System.
+
+FishingStartAll:
+	log("Starting fishing on all accounts...", TimeStamp, LogPath)
+	if (CheckSetTimer = 0)
 	{
-		IniWrite, %vPID%, %A_ScriptDir%/data/savedlogins/%LoginName%/%LoginName%.ini, PID, PID
-		IniWrite, %vHandle%, %A_ScriptDir%/data/savedlogins/%LoginName%/%LoginName%.ini, Handle, Handle	 
+		SetTimer, FishBiteMemoryScan, 1000
+		SetTimer, Recast, 2000
+		CheckSetTimer := 1
 	}
-	IniWrite, %vPID%, %A_ScriptDir%/data/savedlogins/%LoginName%/%LoginName%.ini, PID, PID
-	IniWrite, %vHandle%, %A_ScriptDir%/data/savedlogins/%LoginName%/%LoginName%.ini, Handle, Handle
-	WinMove, ahk_pid %vPID%, , , , %ClientWidth%, %ClientHeight%
+	TotalClients =
+	loop, %A_ScriptDir%\data\savedlogins\*, 2
+	{
+		IfWinNotExist, %A_LoopFileName%
+		{
+			Continue
+		}
+		IniRead, GetFMode, %A_ScriptDir%/data/savedlogins/%A_LoopFileName%/Fishing.ini, Fishing, Mode
+		if (GetFMode = "On")
+		{
+			WinGet, PID, PID, %A_LoopFileName%
+			WinGet, Handle, ID, %A_LoopFileName%
+			If (pID = "" or Handle = "")
+			{
+				Return
+			}
+			
+			HumanPressButton("f", PID)
+			Sleep 400
+			
+			Base := getProcessBaseAddress(Handle)
+			WaterAddress := GetAddressWater(PID, Base, LoadAddress)
+			Sleep 100
+			LavaAddress := GetAddressLava(PID, Base, LoadAddress)
+			ChocoAddress := GetAddressChoco(PID, Base, LoadAddress)
+			Sleep 100
+			GetFishingStateWaterAddress := GetFishingStateWaterAddress(PID, Base, LoadAddress)
+			GetFishingStateLavaAddress := GetFishingStateLavaAddress(PID, Base, LoadAddress)
+			Sleep 100
+			GetFishingStateChocoAddress := GetFishingStateChocoAddress(PID, Base, LoadAddress)
+			Sleep 200
+			
+			;Detecting Liquid type via memory read.
+			DetectedLiquidType := 0 ;Default = for unknown type.
+
+			If (ReadMemory(PID, GetFishingStateWaterAddress) = 1)
+				DetectedLiquidType := 1
+			Else If (ReadMemory(PID, GetFishingStateLavaAddress) = 1)
+				DetectedLiquidType := 2
+			Else If (ReadMemory(PID, GetFishingStateChocoAddress) = 1)
+				DetectedLiquidType := 3
+			;Adding bot to botlist array
+			StartTime := a_now
+			LastReelCast := a_now
+			ActiveFishing := 1 ;Turns it on.
+			Recast := 0
+			ErrorCount := 0
+			ReelinCount := 0
+			RecastCount := 0
+			
+			BotList.Insert(Array(PID ,Handle, Base, WaterAddress, LavaAddress, ChocoAddress, StartTime, LastReelCast, GetFishingStateWaterAddress, GetFishingStateLavaAddress, GetFishingStateChocoAddress , DetectedLiquidType, ActiveFishing, Recast, ErrorCount, A_LoopFileName, ReelinCount, RecastCount))
+			
+			;This to change the detectedliqidtype from a number to the word for displaying
+			If (DetectedLiquidType = 1) ;Water found scan only water type
+			{
+				LiquidType = Water
+			}
+			Else If (DetectedLiquidType = 2) ;Lava found scan only lava type
+			{
+				LiquidType = Lava
+			}
+			Else If (DetectedLiquidType = 3) ;Choco found only scan Choco type
+			{
+				LiquidType = Chocolate
+			}	
+			Else
+			{
+				LiquidType = Unknown
+			}
+			ModifyListView("FishingList", A_LoopFileName, 3, LiquidType)
+			ModifyListView("FishingList", A_LoopFileName, 4, "Active")
+			log("Started fishing for " . A_LoopFileName, TimeStamp, LogPath)
+			TotalClients++
+		}
+	}
+	log("Finish started fishing on all accounts. Total account started: " . TotalClients, TimeStamp, LogPath)
+Return
+
+FishBiteMemoryScan:
+    for index, element in BotList
+    {
+		FishingAccountName := BotList[index, 16]
+        ;Setting Current time of scan. Used to compair for bot error hang
+        CurrentTime = %a_now%
+        WinID :=
+        ;Checking to make sure the next scan that the client is running. If not found it will auto remove form the list and move on to next.
+        WinID := BotList[index, 2]
+        IfWinNotExist, ahk_id %WinID%
+		{
+			log(FishingAccountName . " account no longer found. It will now get remove from fishing.", TimeStamp, LogPath)
+			ModifyListView("FishingList", FishingAccountName, 2, "0")
+			ModifyListView("FishingList", FishingAccountName, 3, "Unknown")
+			ModifyListView("FishingList", FishingAccountName, 4, "Idle")
+			BotList.Remove(index)
+			Return
+		}
+
+        if (BotList[index, 13] = 0) ; Checking to make sure the fishing flag and the recast flag are both set to 1 being on.
+        {
+			ModifyListView("FishingList", FishingAccountName, 4, "Idle")
+        }
+        
+		if (BotList[index, 13] = 1 && BotList[index, 14] = 0)
+		{
+			ModifyListView("FishingList", FishingAccountName, 4, "Active")
+			; Checking last cast on record with current time.
+			LastCastTime := BotList[index, 8]
+			EnvSub, CurrentTime, LastCastTime, Seconds ; Converting last last cast time to Seconds.
+
+			; Error handling to check to make sure it is still fishing.
+			If (8 < CurrentTime && CurrentTime < 11 or 45 < CurrentTime)
+			{
+				FishingState := "0"
+				;Checking all 3 fishing states.
+				CaughtFishingStateWater := ReadMemory(BotList[index, 1], BotList[index, 9])
+				CaughtFishingStateLava := ReadMemory(BotList[index, 1], BotList[index, 10])
+				CaughtFishingStateChoco := ReadMemory(BotList[index, 1], BotList[index, 11])
+
+				; If fishing state = 1 ignores the error logging. 15
+				If (CaughtFishingStateWater = 1 or CaughtFishingStateLava = 1 or CaughtFishingStateChoco = 1)
+				{
+					FishingState := "1"
+					BotList[index, 15] := "0" ;Since fishing is detected it will wipe out the Error Count.
+				}
+
+				If (FishingState = 0)
+				{
+					If (BotList[index, 14] <> 1) ;If recast is not 1 it trigers the Error Report.
+					{ 
+							SetTimer, Recast, Off
+							BotList[index, 15] := BotList[index, 15] + 1 ; Adds 1 for each time it is found not fishing.
+							BotList[index, 14] := 1 ;Turning on the recast flag.
+							SetTimer, Recast, 2000
+							If (BotList[index, 15] > 2)
+							{
+								log("the account: " . BotList[index, 16] . " seems to be not be fishing. Possible causes could be frozen client/character or full inventory.", TimeStamp, LogPath)
+								Text := "the account: " . BotList[index, 16] . " seems to be not be fishing. Possible causes could be frozen client/character or full inventory. Click this window to remove client from list and bring the window to the foreground."
+								TransSplashText_On("Error", Text, 600, "Arial", "Black", 0, 10, , , 7000)
+							}
+							;Fix this by adding a var yes or no to skip next parts do not use return Return
+					}
+				}
+			}
+
+			;Memory scan for current client to check for fish bite
+			If (12 < CurrentTime) ;Wont start a memory scan till 12Seconds has passed. This is to Lower cpu usage.
+			{
+				If (BotList[index, 12] = 1) ;Water type found scan only water type
+				{
+					CaughtWater := ReadMemory(BotList[index, 1], BotList[index, 4])
+				}	
+				Else If (BotList[index, 12] = 2)	;Lava type found scan only lava type
+				{
+					CaughtLava := ReadMemory(BotList[index, 1], BotList[index, 5])
+				}	
+				Else If (BotList[index, 12] = 3) ;Choco type found only scan Choco type
+				{
+					CaughtChoco := ReadMemory(BotList[index, 1], BotList[index, 6])
+				}	
+				Else 
+				{
+					;Unknown type so we can all 3. This will use more cpu.
+					CaughtWater := ReadMemory(BotList[index, 1], BotList[index, 4])
+					CaughtLava := ReadMemory(BotList[index, 1], BotList[index, 5])
+					CaughtChoco := ReadMemory(BotList[index, 1], BotList[index, 6])
+				}
+			} 
+			Else 
+			{
+				CaughtWater := 0
+				CaughtLava := 0
+				CaughtChoco := 0
+			}
+
+			;Preforming reelin
+			If (CaughtWater = 1 or CaughtLava = 1 or CaughtChoco = 1)
+			{
+				;Checking to see if the bot is already recasting. And if so it will ignore below.
+				If (BotList[index, 14] <> 1) 
+				{
+					SetTimer, Recast, Off
+					HumanPressButton("f", BotList[index, 1])
+					Sleep 200
+					BotList[index, 14] := 1   ;Turning on the recast flag.
+					BotList[index, 17] := BotList[index, 17] + 1 ;Padding the reeled in Counter.
+					ReelIn := BotList[index, 17]
+					ModifyListView("FishingList", FishingAccountName, 2, ReelIn)
+					SetTimer, Recast, 2000
+				}
+			}
+		}
+    }
+Return
+
+Recast:
+    TotalClientsOnList := BotList.MaxIndex()
+    Loop, %TotalClientsOnList%
+	{
+		If (BotList[a_index, 14] = 1) ; Checking ot make sure the fishing flag and the recast flag are both set to 1 being on.
+		{
+			BotList[a_index, 18] := BotList[a_index, 18] + 1 ;Pading the recast Count by 1
+			HumanPressButton("f", BotList[a_index, 1])
+			BotList[a_index, 14] := "0"  ;Reseting the recast it recasted. Lure used?
+			BotList[a_index, 8] := A_Now ;Setting the last cast time to current time.
+		}
+	}
+Return
+
+FishingStopAll:
+	log("Stopping fishing on all accounts...", TimeStamp, LogPath)
+	CheckSetTimer := 0
+	SetTimer, FishBiteMemoryScan, Off
+	SetTimer, Recast, Off
+	
+	Global BotList := Object()
+	
+	loop, %A_ScriptDir%\data\savedlogins\*, 2
+	{
+		IniRead, GetFMode, %A_ScriptDir%/data/savedlogins/%A_LoopFileName%/Fishing.ini, Fishing, Mode
+		if (GetFMode = "On")
+		{
+			ModifyListView("FishingList", A_LoopFileName, 2, "0")
+			ModifyListView("FishingList", A_LoopFileName, 3, "Unknown")
+			ModifyListView("FishingList", A_LoopFileName, 4, "Idle")
+			log("Stopped fishing for: " . A_LoopFileName, TimeStamp, LogPath)
+		}
+	}
+	log("Stopped all fishing accounts.", TimeStamp, LogPath)
+Return
+
+FishingStartSelected:
+	if (CheckSetTimer = 0)
+	{
+		SetTimer, FishBiteMemoryScan, 1000
+		SetTimer, Recast, 2000
+		CheckSetTimer := 1
+	}
+	Gui, Main:ListView, FishingList
+	; Gui, Main:Submit, Nohide
+	FocusedRowNumber := LV_GetNext(0, "F")  ; Find the focused row.
+	if not FocusedRowNumber  ; No row is focused.
+    {
+		; SB_SetText("Error: Fail to remove selceted account (See log for details).", 2)
+		log("Fail to start fishing on the selected account: you haven't select any account yet.", TimeStamp, LogPath)
+		; SB_SetText("", 2)
+		Return
+	}
+	LV_GetText(LoginName, FocusedRowNumber, 1)
+	log("Starting fishing for: " . LoginName . " ...", TimeStamp, LogPath)
+	; Getting the pID and Handle that is used for memory scans.
+	WinGet, PID, PID, %LoginName%
+    WinGet, Handle, ID, %LoginName%
+	
+	;First cast also to detect liquid type.
+	HumanPressButton("f", PID)
+	
+	;Setting up addresses for Memory scan
+    Base := getProcessBaseAddress(Handle)
+    WaterAddress := GetAddressWater(PID, Base, LoadAddress)
+    Sleep 200
+    LavaAddress := GetAddressLava(PID, Base, LoadAddress)
+    ChocoAddress := GetAddressChoco(PID, Base, LoadAddress)
+    Sleep 200
+    GetFishingStateWaterAddress := GetFishingStateWaterAddress(PID, Base, LoadAddress)
+    GetFishingStateLavaAddress := GetFishingStateLavaAddress(PID, Base, LoadAddress)
+    Sleep 200
+    GetFishingStateChocoAddress := GetFishingStateChocoAddress(PID, Base, LoadAddress)
+	
+	;Detecting Liquid type via memory read.
+    DetectedLiquidType := 0 ;Default = for unknown type.
+    If (ReadMemory(PID, GetFishingStateWaterAddress) = 1)
+        DetectedLiquidType := 1
+    Else If (ReadMemory(PID, GetFishingStateLavaAddress) = 1)
+		DetectedLiquidType := 2
+    Else If (ReadMemory(PID, GetFishingStateChocoAddress) = 1)
+		DetectedLiquidType := 3
+
+	;Adding bot to botlist array
+    StartTime := a_now
+    LastReelCast := a_now
+    ActiveFishing := 1 ;Turns it on.
+    Recast := 0
+    ErrorCount := 0
+    ReelinCount := 0
+    RecastCount := 0
+	
+	BotList.Insert(Array(PID ,Handle, Base, WaterAddress, LavaAddress, ChocoAddress, StartTime, LastReelCast, GetFishingStateWaterAddress, GetFishingStateLavaAddress, GetFishingStateChocoAddress , DetectedLiquidType, ActiveFishing, Recast, ErrorCount, LoginName, ReelinCount, RecastCount))
+
+	;This to change the detectedliqidtype from a number to the word for displaying
+	If (DetectedLiquidType = 1) ;Water found scan only water type
+	{
+		LiquidType = Water
+	}
+	Else If (DetectedLiquidType = 2) ;Lava found scan only lava type
+	{
+		LiquidType = Lava
+	}
+	Else If (DetectedLiquidType = 3) ;Choco found only scan Choco type
+	{
+		LiquidType = Chocolate
+	}	
+	Else
+	{
+		LiquidType = Unknown
+	}
+	
+	ModifyListView("FishingList", LoginName, 3, LiquidType)
+	ModifyListView("FishingList", LoginName, 4, "Active")
+	log("Fishing started for " . LoginName, TimeStamp, LogPath)
+Return
+
+FishingStopSelected:
+	Gui, Main:ListView, FishingList
+	; Gui, Main:Submit, Nohide
+	FocusedRowNumber := LV_GetNext(0, "F")  ; Find the focused row.
+	if not FocusedRowNumber  ; No row is focused.
+    {
+		; SB_SetText("Error: Fail to remove selceted account (See log for details).", 2)
+		log("Fail to start fishing on the selected account: you haven't select any account yet.", TimeStamp, LogPath)
+		; SB_SetText("", 2)
+		Return
+	}
+	LV_GetText(LoginName, FocusedRowNumber, 1)
+	
+	ModifyListView("FishingList", LoginName, 2, "0")
+	ModifyListView("FishingList", LoginName, 3, "Unkown")
+	ModifyListView("FishingList", LoginName, 4, "Idle")
+	
+	WinGet, PID, PID, %LoginName%
+
+    for index, element in BotList
+    {
+        If (BotList[index][1] = PID)
+            {
+				log("Stopped fishing for " . BotList[index, 17], TimeStamp, LogPath)
+				BotList.Remove(index)
+                Return
+            }
+    }
+	
+	TotalClientsOnList := BotList.MaxIndex()
+	if (TotalClientsOnList = 0)
+	{
+		CheckSetTimer := 0
+		SetTimer, FishBiteMemoryScan, Off
+		SetTimer, Recast, Off
+	}
+Return
+
+; Button Setting Save
+FishingSettingSave:
+	GuiControlGet, Address
+	
+	IniWrite, %Address%, %A_ScriptDir%/data/configs/fishingsystem.ini, MemoryAddress, Address
+	
+	; SB_SetText("Successfully saved fishing address.", 2)
+	log("Saved fishing address for Fishing Bot. New address is: " . Address, TimeStamp, LogPath)
+	; SB_SetText("", 2)
+Return
+
+; Reload Fishing List Function.
+FishingListReload()
+{
+	Gui, Main:Default
+	Gui, Main:ListView, FishingList
+	LV_Delete()
+	loop, %A_ScriptDir%\data\savedlogins\*, 2
+	{
+		IniRead, FMode, %A_ScriptDir%/data/savedlogins/%A_LoopFileName%/Fishing.ini, Fishing, Mode
+		if (FMode = "On")
+		{
+			LV_Add("", A_LoopFileName, "0", "Unknown", "Idle")
+		}
+	}
 	Return
 }
-; ~End~ Button Start Selected Account / Start All Account and related functions.
-; -------------------------------------------------------------------------
 
-
-; -------------------------------------------------------------------------
-; ~Start~ Button Instruction.
-Instruction:
-	MsgBox, 64, INSTRUCTION, Coming Soon!, 3
-Return
-; ~End~ Button Instruction.
-; -------------------------------------------------------------------------
-
-
-; -------------------------------------------------------------------------
-; ~Start~ All buttons and functions related to Settings GUI.
-
-; Show Settings GUI.
-Setting:
-	Gui, Setting:Submit, nohide
-	Gui, Setting:Show, x300 y220 h500 w385, SETTINGS
-	OnMessage(0x200, "Help")
-	
-	IniRead, GetAddress, %A_ScriptDir%/data/configs/fishingconfig.ini, Memory, Address
-	IniRead, GetBDTime, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, Time Between Session, BootDeconsTime
-	IniRead, GetFishingTime, %A_ScriptDir%/data/configs/fishingconfig.ini, Time Between Session, FishingSessionDelay
-	IniRead, GetChangeName, %A_ScriptDir%/data/configs/launcherconfig.ini, Game Window, ChangeName
-	IniRead, SAAHK, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, StartAllAccount
-	IniRead, FStartHK, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, FishingStart
-	IniRead, FStopHK, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, FishingStop
-	IniRead, BDStartHK, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, BootDeconsStart
-	IniRead, BDStopHK, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, BootDeconsStop
-	IniRead, BDMethod, %A_ScriptDir%/data/configs/launcherconfig.ini, Boot Drop Method, BootDropMethod
-	IniRead, GetPixelColor, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, Empty Slot Pixel Color, Color
-	IniRead, GetGlyphVer, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
-	
-	GuiControl, Setting:, Address, %GetAddress%
-	GuiControl, Setting:, PixelColor, %GetPixelColor%
-	GuiControl, Setting:, BDTime, %GetBDTime%
-	GuiControl, Setting:, FishingTime, %GetFishingTime%
-	
-	ControlSetText, , %GetChangeName%, ahk_id %HChangeWindowName%
-	ControlSetText, , %GetGlyphVer%, ahk_id %HGlyphVer%
-	GuiControl, Setting:Disable, ChangeWindowName
-	ControlSetText, , %SAAHK%, ahk_id %HSAA_HK%
-	ControlSetText, , %FStartHK%, ahk_id %HFStart_HK%
-	ControlSetText, , %FStopHK%, ahk_id %HFStop_HK%
-	ControlSetText, , %BDStartHK%, ahk_id %HBDStart_HK%
-	ControlSetText, , %BDStopHK%, ahk_id %HBDStop_HK%
-	ControlSetText, , %BDMethod%, ahk_id %HBootDropMethod%
-Return
-
-; Button Save Settings.
-SaveButtonSetting:
-	Gui, Setting:Submit, nohide
-	
-	GuiControlGet, Address
-	GuiControlGet, PixelColor
-	GuiControlGet, BDTime
-	GuiControlGet, FishingTime
-	GuiControlGet, BootDropMethod
-	GuiControlGet, ChangeWindowName
-	GuiControlGet, GlyphVer
-	GuiControlGet, SAA_HK
-	GuiControlGet, FStart_HK
-	GuiControlGet, FStop_HK
-	GuiControlGet, BDStart_HK
-	GuiControlGet, BDStop_HK
-	
-	if (SAA_HK = FStart_HK or SAA_HK = FStop_HK or SAA_HK = BDStart_HK or SAA_HK = BDStop_HK or FStart_HK = FStop_HK or FStart_HK = BDStart_HK or FStart_HK = BDStop_HK or FStop_HK = BDStart_HK or FStop_HK = BDStop_HK or BDStart_HK = BDStop_HK or)
+FishingMode(LoginName)
+{
+	Global TimeStamp
+	Global LogPath
+	MsgBox, 36, SAVE CURRENT LOGIN ACCOUNT, Do you want to enable fishing for %LoginName%?`r`nYou can change this later by double click on %LoginName%.
+	ifMsgBox Yes
 	{
-		MsgBox, 64, SETTING, One or more of your Hotkey is duplicated please check again!
-		return
+		IniWrite, On, %A_ScriptDir%/data/savedlogins/%LoginName%/Fishing.ini, Fishing, Mode
+		log("Fishing is turned on for " . LoginName, TimeStamp, LogPath)
 	}
 	else
 	{
-		IniWrite, %Address%, %A_ScriptDir%/data/configs/fishingconfig.ini, Memory, Address
-		IniWrite, %PixelColor%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, Empty Slot Pixel Color, Color
-		IniWrite, %BDTime%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, Time Between Session, BootDeconsTime
-		IniWrite, %FishingTime%, %A_ScriptDir%/data/configs/fishingconfig.ini, Time Between Session, FishingSessionDelay
-		IniWrite, %BootDropMethod%, %A_ScriptDir%/data/configs/launcherconfig.ini, Boot Drop Method, BootDropMethod
-		IniWrite, %ChangeWindowName%, %A_ScriptDir%/data/configs/launcherconfig.ini, Game Window, ChangeName
-		IniWrite, %GlyphVer%, %A_ScriptDir%/data/configs/launcherconfig.ini, GlyphVer, Version
-		IniWrite, %SAA_HK%, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, StartAllAccount
-		IniWrite, %FStart_HK%, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, FishingStart
-		IniWrite, %FStop_HK%, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, FishingStop
-		IniWrite, %BDStart_HK%, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, BootDeconsStart
-		IniWrite, %BDStop_HK%, %A_ScriptDir%/data/configs/launcherconfig.ini, HotKey, BootDeconsStop
-
-		HotKey, ^%SAA_HK%, SAA, On
-		HotKey, ^%FStart_HK%, FStart, On
-		HotKey, ^%FStop_HK%, FStop, On
-		HotKey, ^%BDStart_HK%, BDStart, On
-		HotKey, ^%BDStop_HK%, BDStop, On
-		
-		Gui, Setting:Hide
-		MsgBox, 64, SETTING, Settings are successfully saved!
+		IniWrite, Off, %A_ScriptDir%/data/savedlogins/%LoginName%/Fishing.ini, Fishing, Mode
+		log("Fishing is turned off for " . LoginName, TimeStamp, LogPath)
 	}
-Return
+	Return
+}
+; ~End~ Fishing System.
+; -------------------------------------------------------------------------
 
-; Button Update Pixel Color.
-UpdatePixel:
-	Gui, Setting:Submit, nohide
-	
-	WinActivate, Trove
-	
-	Loop
+
+
+
+
+
+; -------------------------------------------------------------------------
+; ~Start~ Boot/Decons System.
+
+BDList:
+	Gui, Main:ListView, BDList
+	if A_GuiEvent = Normal
 	{
-		Imagesearch, UpdatePCX, UpdatePCY, ClientWidth-140, 0, ClientWidth, ClientHeight, *10 %A_ScriptDir%\data\img\inv\emptyslot.png
-		if ErrorLevel = 0
+		FocusedRowNumber := LV_GetNext(0, "F")  ; Find the focused row.
+		if not FocusedRowNumber  ; No row is focused.
 		{
-			WinActivate, Trove
-			PixelGetColor, UpdateColor, UpdatePCX+2, UpdatePCY+5
-			IniWrite, %UpdateColor%, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, Empty Slot Pixel Color, Color
-			break
+			Return
+		}
+		LV_GetText(LoginName, FocusedRowNumber, 1)
+		LV_GetText(GetBMode, FocusedRowNumber, 2)  ; Get the text from the row's first field.
+		if (GetBMode = "On")
+		{
+			NewBMode := "Off"
+			IniWrite, %NewBMode%, %A_ScriptDir%/data/savedlogins/%LoginName%/BDMode.ini, Boot, Mode
+			LV_Modify(FocusedRowNumber, "", , NewBMode)
+			log("Boot Drop Mode is turned off for " . LoginName, TimeStamp, LogPath)
+		}
+		else
+		{
+			NewBMode := "On"
+			IniWrite, %NewBMode%, %A_ScriptDir%/data/savedlogins/%LoginName%/BDMode.ini, Boot, Mode
+			LV_Modify(FocusedRowNumber, "", , NewBMode)
+			log("Boot Drop Mode is turned on for " . LoginName, TimeStamp, LogPath)
 		}
 	}
 	
-	GuiControl, Setting:, PixelColor, %UpdateColor%
-	
-	Msgbox, 64, UPDATE EMPTY SLOT PIXEL, Empty slot pixel color is updated. New color is: %UpdateColor%.
+	Gui, Main:ListView, BDList
+	if A_GuiEvent = RightClick
+	{
+		FocusedRowNumber := LV_GetNext(0, "F")  ; Find the focused row.
+		if not FocusedRowNumber  ; No row is focused.
+		{
+			Return
+		}
+		LV_GetText(LoginName, FocusedRowNumber, 1)
+		LV_GetText(GetDMode, FocusedRowNumber, 3)  ; Get the text from the row's first field.
+		if (GetDMode = "On")
+		{
+			NewDMode := "Off"
+			IniWrite, %NewDMode%, %A_ScriptDir%/data/savedlogins/%LoginName%/BDMode.ini, Decons, Mode
+			LV_Modify(FocusedRowNumber, "", , , NewDMode)
+			log("Decons Mode is turned off for " . LoginName, TimeStamp, LogPath)
+		}
+		else
+		{
+			NewDMode := "On"
+			IniWrite, %NewDMode%, %A_ScriptDir%/data/savedlogins/%LoginName%/BDMode.ini, Decons, Mode
+			LV_Modify(FocusedRowNumber, "", , , NewDMode)
+			log("Decons Mode is turned on for " . LoginName, TimeStamp, LogPath)
+		}
+	}
 Return
 
-Help:
-Return
-
-; Showing ToolTip when hover "?" image.
-Help() {
-
-	ToolTip 
-	
-	CurrControl := A_GuiControl 
-	Help := ""
-	
-	IfEqual, CurrControl, SettingHelp1
-	{
-		Help := "BootDecons Session Delay is the delay time between each`nauto drop boot and auto decons trophy fish session. Time is`nin ms, 1s = 1000ms. Default: 10 minutes."
-	}
-	else IfEqual, CurrControl, SettingHelp2
-	{
-		Help := "Fishing Session Delay is the delay time between each fishing`nsession. Time is in ms, 1s = 1000ms. Default: 2 seconds."
-	}
-	else IfEqual, CurrControl, SettingHelp3
-	{
-		Help := "If image search method doesn't work for you then choose`nmanual method. Default: Image Search"
-	}
-	else IfEqual, CurrControl, SettingHelp4
-	{
-		Help := "Game Window Naming is changing the game window`nname from Trove to something else. If checked the bot`nwill change the game window name to the account name`nyou set. Default: No."
-	}
-
-	ToolTip % Help
-	
-	Return
-}
-
-; Close Settings GUI.
-SettingGuiClose:
-CancelButtonSetting:
-	Gui, Setting:Hide
-Return
-; ~End~ All buttons and functions related to Settings GUI.
-; -------------------------------------------------------------------------
-
-
-; -------------------------------------------------------------------------
-; ~Start~ Fishing Bot.
-
-;Start Fishing
-FStart:
-FishingStart:
-	IniWrite, 0, %A_ScriptDir%/data/configs/fishingconfig.ini, Break, Break
-
-	Loop, %A_ScriptDir%/data/savedlogins\*, 2
-	{
-		Run, %A_AhkPath% "%A_ScriptDir%\FishingClient.ahk" %A_LoopFileName%
-	}
-	
-	MsgBox, 64, FISHING START, Successfully started fishing bot on all accounts.
-Return
-
-;Stop Fishing
-FStop:
-FishingStop:
-	IniWrite, 1, %A_ScriptDir%/data/configs/fishingconfig.ini, Break, Break
-	
-	MsgBox, 64, FISHING STOP, Successfully stopped fishing bot on all accounts.
-Return
-; ~End~ Fishing Bot.
-; -------------------------------------------------------------------------
-
-
-; -------------------------------------------------------------------------
-; ~Start~ Auto Throw Boot (ATB)/ Auto Decons (AD) Bot.
 BDStart:
-BootDeconsStart:
 	BDActive := 1
-	MsgBox, 64, BOOT AND DECONS START, Successfully started auto throw boot and auto decons trophy`nfish for all accounts., 2
-	BDActiveLoop1:
+	log("Started auto drop boot and auto decons.", TimeStamp, LogPath)
 	Loop
 	{
 		if (BDActive = 0)
 		{
-			Break BDActiveLoop1
+			Return
 		}
 		else
 		{
-			BDActiveLoop2:
-			Loop, %A_ScriptDir%/data/savedlogins\*, 2
+			TotalClientsOnList := BotList.MaxIndex()
+			Loop, %TotalClientsOnList%
 			{
 				if (BDActive = 0)
 				{
-					Break BDActiveLoop1
+					return
 				}
-				else
+				PID := BotList[a_index, 1]
+				BotName := BotList[a_index, 16]
+				IniRead, BMode, %A_ScriptDir%/data/savedlogins/%BotName%/BDMode.ini, Boot, Mode
+				IniRead, DMode, %A_ScriptDir%/data/savedlogins/%BotName%/BDMode.ini, Decons, Mode
+				if (DMode = "On")
 				{
-					IniRead, PID, %A_ScriptDir%/data/savedlogins/%A_LoopFileName%/%A_LoopFileName%.ini, PID, PID
-					BootDrop(PID)
-					RandomSleep(2000, 3000)
 					Decons(PID)
-					RandomSleep(2000, 3000)
+					RandomSleep(1000, 2000)
+				}
+				if (BMode = "On")
+				{
+					BootDrop(PID)
+					RandomSleep(1000, 2000)
 				}
 			}
 		}
 		
-		IniRead, GetBDTime, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, Time Between Session, BootDeconsTime
+		IniRead, GetBDTime, %A_ScriptDir%/data/configs/bdsystem.ini, SessionDelay, Time
 		SetTimer, UpdateOSD, 200
-		Period := milli2hms(GetBDTime, h, m, s) ; Specified a known static Period (15 seconds for testing purposes)
-		StringMid ,Periodh, Period,1, 2
-		StringMid ,Periodm, Period,3, 2
-		StringMid ,Periods, Period,5, 2
-		Periodsec := (Periodh*3600) + (Periodm*60) + Periods
+		Periodsec := GetBDTime/1000
 		StartTime = %A_Now%
 		EndTime = %A_Now%
 		EnvAdd EndTime, Periodsec, seconds
@@ -773,7 +1164,6 @@ BootDeconsStart:
 Return
 
 UpdateOSD:
-	; msgbox % BDActive
 	if (BDActive = 0)
 	{
 		perc = 100
@@ -792,61 +1182,29 @@ UpdateOSD:
 			SetTimer, UpdateOSD, Off
 		}
 	}
-	
-Return
-
-BDStop:
-BootDeconsStop:
-	BDActive := 0
-
-	MsgBox, 64, BOOT AND DECONS START, Successfully stopped auto throw boot and auto decons trophy`nfish for all accounts., 2
-	;Reload
 Return
 
 Decons(PID)
 {
-	IniRead, GetDWX, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, DeconsWindowX
-	IniRead, GetDWY, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, DeconsWindowY
-	
-	IniRead, GetPColor, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, Empty Slot Pixel Color, Color
-	
-	DeconsLoop1:
-	Loop, 20
-	{	
+	WinActivate, ahk_pid %PID%
+		
+	TotalSlot := CoordSlot.MaxIndex()
+	Loop, %TotalSlot%
+	{
 		if (BDActive = 0)
 		{
-			Break DeconsLoop1
+			return
 		}
-		WinActivate, ahk_pid %PID%
-		
-		IniRead, GetSlotX, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_X
-		IniRead, GetSlotY, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_Y
-		
-		PixelGetColor, ColorDecons, GetSlotX, GetSlotY
-		if (ColorDecons != GetPColor)
-		{
-			MouseClickDrag, Left, GetSlotX, GetSlotY, GetDWX, GetDWY, 4
-			RandomSleep(500, 1000)
-			MouseClick, Left, GetDWX, GetDWY
-			RandomSleep(500, 1000)
-			Imagesearch, ConfirmDeX, ConfirmDeY, ClientWidth-300, 160, ClientWidth-180, 220, *50 %A_ScriptDir%\data\img\confirm\confirmdecons.png
-			if ErrorLevel = 0
-			{
-				WinActivate, ahk_pid %PID%
-				MouseClick, Left, %ConfirmDeX%, %ConfirmDeY%
-				RandomSleep(350, 500)
-			}
-		}
-		else
-		{
-			RandomSleep(250, 500)
-		}
+		CoordSlotX := CoordSlot[a_index, 1]
+		CoordSlotY := CoordSlot[a_index, 2]
+		MouseClick, Right, CoordSlotX, CoordSlotY
+		RandomSleep(250, 500)
 	}
 	
-	IniRead, BtnAcceptX, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, BtnAcceptX
-	IniRead, BtnAcceptY, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, BtnAcceptY
-	IniRead, BtnYesX, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, BtnYesX
-	IniRead, BtnYesY, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, DeconsCoord, BtnYesY
+	IniRead, BtnAcceptX, %A_ScriptDir%/data/configs/bdsystem.ini, DeconsCoord, BtnAcceptX
+	IniRead, BtnAcceptY, %A_ScriptDir%/data/configs/bdsystem.ini, DeconsCoord, BtnAcceptY
+	IniRead, BtnYesX, %A_ScriptDir%/data/configs/bdsystem.ini, DeconsCoord, BtnYesX
+	IniRead, BtnYesY, %A_ScriptDir%/data/configs/bdsystem.ini, DeconsCoord, BtnYesY
 		
 	WinActivate, ahk_pid %PID%
 	;Decons Accept
@@ -857,92 +1215,154 @@ Decons(PID)
 	Sleep, 1500
 	MouseClick, left, BtnYesX, BtnYesY
 	
-	return
+	Return	
 }
 
 BootDrop(PID)
-{	
-	IniRead, GetBDMethod, %A_ScriptDir%/data/configs/launcherconfig.ini, Boot Drop Method, BootDropMethod
-	
+{
 	WinActivate, ahk_pid %PID%
 	
-	if (GetBDMethod = "Image Search")
+	TotalSlot := CoordSlot.MaxIndex()
+	Loop, %TotalSlot%
 	{
-		HumanPressButton("b", PID)
-		RandomSleep(1000, 1500)
-		HumanPressButton("b", PID)
-		RandomSleep(1000, 1500)
-		
-		BootDropLoop1:
-		Loop
+		if (BDActive = 0)
 		{
-			if (BDActive = 0)
-			{
-				Break BootDropLoop1
-			}
-			N = 0
-			BootDropLoop2:
-			Loop, 4
-			{
-				if (BDActive = 0)
-				{
-					Break BootDropLoop2
-				}
-				WinActivate, ahk_pid %PID%
-				Imagesearch, FoundBootX, FoundBootY, ClientWidth-140, 150, ClientWidth, ClientHeight, *50 %A_ScriptDir%\data\img\boot\%a_index%.png
-				if ErrorLevel = 0
-				{
-					N++
-					WinActivate, ahk_pid %PID%
-					MouseClickDrag, Left, %FoundBootX%, %FoundBootY%, FoundBootX-160, FoundBootY-60, 4
-					Sleep, 200
-					break
-				}
-			}
-			if N = 0
-			{
-				break
-			}
+			return
 		}
+		CoordSlotX := CoordSlot[a_index, 1]
+		CoordSlotY := CoordSlot[a_index, 2]
+		MouseClickDrag, Left, CoordSlotX, CoordSlotY, 240, 150, 4
+		Sleep, 200
+		Click, 240, 150
+		RandomSleep(1000, 1500)
+		Click, 270, 205
+		RandomSleep(500, 1000)
+	}
+	
+	Return
+}
+
+HKBDStop:
+BDStop:
+	BDActive := 0
+	log("Stopped auto drop boot and auto decons.", TimeStamp, LogPath)
+Return
+
+BDSettingSave:
+	GuiControlGet, BDDelay
+	GuiControlGet, BootDropMethod
+	GuiControlGet, HK_BDStop
+	
+	IniWrite, %BDDelay%, %A_ScriptDir%/data/configs/bdsystem.ini, SessionDelay, Time
+	IniWrite, %BootDropMethod%, %A_ScriptDir%/data/configs/bdsystem.ini, DropMethod, Method
+	IniWrite, %HK_BDStop%,  %A_ScriptDir%/data/configs/bdsystem.ini, HotKey, Stop
+	
+	GetHotKey := StrSplit(HK_BDStop, " + ") 
+	HK_BDStop := GetHotKey[2]
+	HotKey, ^%HK_BDStop%, HKBDStop, On
+	
+	log("Saved new session delay time, boot drop method and boot drop stop hotkey for Boot/Decons Bot. New settings are: " . BDDelay . ", " . BootDropMethod . ", Ctrl + " . HK_BDStop, TimeStamp, LogPath)
+Return
+
+BDListReload()
+{
+	Gui, Main:Default
+	Gui, Main:ListView, BDList
+	LV_Delete()
+	loop, %A_ScriptDir%\data\savedlogins\*, 2
+	{
+		IniRead, BMode, %A_ScriptDir%/data/savedlogins/%A_LoopFileName%/BDMode.ini, Boot, Mode
+		IniRead, DMode, %A_ScriptDir%/data/savedlogins/%A_LoopFileName%/BDMode.ini, Decons, Mode
+		LV_Add("", A_LoopFileName, BMode, DMode)
+	}
+	Return
+}
+
+LoadingCoordOut()
+{
+	Loop, 20
+	{
+		IniRead, GetBaseX, %A_ScriptDir%/data/configs/bdsystem.ini, SlotsCoord, BaseX
+		IniRead, GetBaseY, %A_ScriptDir%/data/configs/bdsystem.ini, SlotsCoord, BaseY
+		
+		BaseX_1 := BaseX_6 := BaseX_11 := BaseX_16 := GetBaseX
+		BaseX_2 := BaseX_7 := BaseX_12 := BaseX_17 := BaseX_1+20 ;Relative 20, Client 20
+		BaseX_3 := BaseX_8 := BaseX_13 := BaseX_18 := BaseX_2+21 ;Relative 21, Client 21
+		BaseX_4 := BaseX_9 := BaseX_14 := BaseX_19 := BaseX_3+21 ;Relative 21, Client 21
+		BaseX_5 := BaseX_10 := BaseX_15 := BaseX_20 := BaseX_4+21 ;Relative 21, Client 21
+		
+		if (a_index <= 5)
+		{
+			BaseX := BaseX_%a_index%
+			BaseY := GetBaseY
+			CoordSlot.Insert(Array(BaseX, BaseY))
+		}
+		else if (a_index >5 and a_index <= 10)
+		{
+			BaseX := BaseX_%a_index%
+			BaseY := GetBaseY+20
+			CoordSlot.Insert(Array(BaseX, BaseY))
+		}
+		else if (a_index >10 and a_index <= 15)
+		{
+			BaseX := BaseX_%a_index%
+			BaseY := GetBaseY+40
+			CoordSlot.Insert(Array(BaseX, BaseY))
+		}
+		else if (a_index >15 and a_index <= 20)
+		{	
+			BaseX := BaseX_%a_index%
+			BaseY := GetBaseY+60
+			CoordSlot.Insert(Array(BaseX, BaseY))
+		}
+	}
+	Return
+}
+
+BDMode(LoginName)
+{
+	Global TimeStamp
+	Global LogPath
+	MsgBox, 36, SAVE CURRENT LOGIN ACCOUNT, Do you want to enable Boot/Decons for %LoginName%?`r`nYou can change this later by either left click or right click on %LoginName%.
+	ifMsgBox Yes
+	{
+		IniWrite, On, %A_ScriptDir%/data/savedlogins/%LoginName%/BDMode.ini, Boot, Mode
+		IniWrite, On, %A_ScriptDir%/data/savedlogins/%LoginName%/BDMode.ini, Decons, Mode
+		log("Boot/Decons is turned on for " . LoginName, TimeStamp, LogPath)
 	}
 	else
 	{
-		BootDropLoop3:
-		Loop, 20
-		{	
-			if (BDActive = 0)
-			{
-				Break BootDropLoop3
-			}
-			WinActivate, ahk_pid %PID%
-			IniRead, GetSlotX, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_X
-			IniRead, GetSlotY, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, SlotsCoord, Slot_%a_index%_Y
-			IniRead, GetPColor, %A_ScriptDir%/data/configs/bootdeconsconfig.ini, Empty Slot Pixel Color, Color
-			
-			PixelGetColor, Color, GetSlotX, GetSlotY
-			if (Color != GetPColor)
-			{
-				MouseClickDrag, Left, GetSlotX, GetSlotY, GetSlotX-160, GetSlotY-60, 4
-				RandomSleep(520, 750)
-				Imagesearch, ConfirmDrX, ConfirmDrY, ClientWidth-340, 160, ClientWidth-140, 220, *50 %A_ScriptDir%\data\img\confirm\confirmdrop.png
-				if ErrorLevel = 0
-				{
-					WinActivate, ahk_pid %PID%
-					MouseClick, Left, %ConfirmDrX%, %ConfirmDrY%
-					Sleep, 200
-				}
-				RandomSleep(520, 750)
-			}
-		}
+		IniWrite, Off, %A_ScriptDir%/data/savedlogins/%LoginName%/BDMode.ini, Boot, Mode
+		IniWrite, Off, %A_ScriptDir%/data/savedlogins/%LoginName%/BDMode.ini, Decons, Mode
+		log("Boot/Decons is turned off for " . LoginName, TimeStamp, LogPath)
 	}
-	return
+	Return
 }
-; ~End~ Auto Throw Boot (ATB)/ Auto Decons (AD) Bot.
+; ~End~ Boot/Decons System.
 ; -------------------------------------------------------------------------
+
+
+
+
 
 
 ; -------------------------------------------------------------------------
 ; ~Start~ Ultilities Functions.
+
+ModifyListView(ListViewVar, AccountName, Column, Text)
+{
+	Gui, Main:Default
+	Gui, Main:ListView, %ListViewVar%
+	Loop % LV_GetCount()
+	{
+		LV_GetText(RetrievedAccountName, A_Index)
+		if InStr(RetrievedAccountName, AccountName)
+		{
+			LV_Modify(A_Index, "Col" Column, Text)
+		}
+	}
+}
+
 FormatSeconds(NumberOfSeconds)  ; Convert the specified number of seconds to hh:mm:ss format.
 {
     time = 19990101  ; *Midnight* of an arbitrary date.
@@ -972,82 +1392,193 @@ RandomSleep(time1, time2)
     Sleep, %SleepTime%
 }
 
-$TIME()
-{
-	Static @S
-	Static @M
-	Static @H
-	Static @T
-	Static @@T
+ToolTipDisplay(Message) {
+        ToolTip, %Message%
+        SetTimer, RemoveToolTip, 5000
+        Return
+    }
+RemoveToolTip:
+    SetTimer, RemoveToolTip, Off
+    ToolTip
+Return
 
-	IF @S =
+TransSplashText_On(Title="",Text="",Width="",Font="",TC="",SC="",TS="",xPos="",yPos="",TimeOut="")
+{
+	TransSplashText_Off()
+	If Title = 
 	{
-		@S = 0
-		@M = 0
-		@H = 0
+		Title = %A_ScriptName%
 	}
-	
-	@T := A_Now
-	IF @T != %@@T%
+	If Text = 
 	{
-		@S++
-		IF @S = 60
-		{
-			@S = 0
-			@M++
-			IF @M = 60
-			{
-				@M = 0
-				@H++
-			}
-		}
+		Text = TransSplashText
 	}
-	@@T := @T
-	@ = SMH
-	Loop,Parse,@
+	If Width = 
 	{
-		StringLen,@,% @%A_LoopField%
-		IF @ = 1
-		{
-			@ := @%A_LoopField%
-			@%A_LoopField% = 0%@%
-		}
+		Width = 200
 	}
-	
-	@ = %@H%:%@M%:%@S%
-	
-	Return @
+	If Font = 
+	{
+		Font = Impact
+	}
+	If TC = 
+	{
+		TC = White
+	}
+	If SC = 
+	{
+		SC = 828284
+	}
+	If TS = 
+	{
+		TS = 20
+	}
+	If xPos = 
+	{
+		xPos = Center
+	}
+	If yPos = 
+	{
+		yPos = Center
+	}
+	If TimeOut = 
+	{
+		TimeOut = 0
+	}
+	If SC != 0
+	{
+		Gui, 99:Font, S%TS% C%SC%, %Font%
+		Gui, 99:Add, Text, x7 y7 w%Width%, %Text%
+	}
+	Gui, 99:Font, S%TS% C%TC%, %Font%
+	Gui, 99:Add, Text, x5 y5 w%Width% gGUITextClick, %Text%
+
+	;Gui, 99:Color, EEAA99
+	Gui, 99:+LastFound +AlwaysOnTop +ToolWindow ;-Caption
+	;WinSet, TransColor, EEAA99
+	Gui, 99:Show, x%xPos% y%yPos% AutoSize, %Title%
+	If TimeOut != 0
+	{
+		SetTimer, TextOff, %TimeOut%
+		Return
+		TextOff:
+		TransSplashText_Off()
+		Return
+	}
 }
 
-milli2hms(milli, ByRef hours=0, ByRef mins=0, ByRef secs=0, secPercision=0)
-{
-	SetFormat, FLOAT, 0.%secPercision%
-	milli /= 1000.0
-	@s := mod(milli, 60)
-	SetFormat, FLOAT, 0.0
-	milli //= 60
-	@m := mod(milli, 60)
-	@h := milli //60
-	@ = smh
-	Loop,Parse,@
+GUITextClick:
+    TransSplashText_Off() ;Turns off any active splash Screens.
+    TotalClientsOnList := BotList.MaxIndex()
+    Loop, %TotalClientsOnList%
 	{
-		StringLen,@,% @%A_LoopField%
-		IF @ = 1
+		If (1 < BotList[a_index, 15]) ;If client has any erors Counts it will automatic remove form active fishing when Gui is Clicked
 		{
-			@ := @%A_LoopField%
-			@%A_LoopField% = 0%@%
+			ClientWindow := BotList[a_index, 2]
+			WinActivate, ahk_id %ClientWindow% ;Brings the erroed client to the foregound.
+			BotList[a_index, 13] := 0 ;Removing client from active scan list.
+			BotList[a_index, 15] := 0 ;Resetting errot Count as it is no longer on the active list.
+			BotList[a_index, 14] := 0 ;Removing Recast just incase. If it is activly fishing it wont try and recast lure.
+			ToolTipDisplay("Removed " . BotList[a_index, 16] . " account from active fishing list.")
 		}
 	}
-	@ = %@h%%@m%%@s%
-	return  @ 
+Return
+
+TransSplashText_Off()
+{
+	Gui, 99:Destroy
+	SetTimer, TextOff, Off
+}
+
+log(msg, timestamp, txtpath)
+{
+	FileAppend, ;Text file write
+	(
+	[%timestamp%]: %msg%`n
+	), %txtpath%
+	GuiControlGet, Console
+	GuiControl, Main:, Console, %Console%[%timestamp%]: %msg%`r`n ; GUI write
+	sleep 1000 ; Pause for smooth log scrolling
+}
+
+GetAddressWater(PID, Base, Address)
+{
+    pointerBase := base + Address
+    y1 := ReadMemory(PID, pointerBase)
+    y2 := ReadMemory(PID, y1 + 0x144)
+    y3 := ReadMemory(PID, y2 + 0xe4)
+    Return @ := (y3 + 0x70)   
+}
+
+GetAddressLava(PID, Base, Address)
+{
+	pointerBase := base + Address
+	y1 := ReadMemory(PID, pointerBase)
+	y2 := ReadMemory(PID, y1 + 0x144)
+	y3 := ReadMemory(PID, y2 + 0xe4)
+	Return @ := (y3 + 0x514) 
+}
+
+GetAddressChoco(PID, Base, Address)
+{
+	pointerBase := base + Address
+	y1 := ReadMemory(PID, pointerBase)
+	y2 := ReadMemory(PID, y1 + 0x144)
+	y3 := ReadMemory(PID, y2 + 0xe4)
+	Return @ := (y3 + 0x2c0)
+}  
+
+GetFishingStateWaterAddress(PID, Base, Address)
+{
+ pointerBase := base + Address
+ y1 := ReadMemory(PID, pointerBase)
+ y2 := ReadMemory(PID, y1 + 0x5d8)
+ y3 := ReadMemory(PID, y2 + 0x7d4)
+ Return @ := (y3 + 0x5a0)
+}
+ 
+GetFishingStateChocoAddress(PID, Base, Address)
+{
+ pointerBase := base + Address
+ y1 := ReadMemory(PID, pointerBase)
+ y2 := ReadMemory(PID, y1 + 0x5d8)
+ y3 := ReadMemory(PID, y2 + 0x7d8)
+ Return @ := (y3 + 0x684)
+}
+ 
+GetFishingStateLavaAddress(PID, Base, Address)
+{
+ pointerBase := base + Address
+ y1 := ReadMemory(PID, pointerBase)
+ y2 := ReadMemory(PID, y1 + 0x5d8)
+ y3 := ReadMemory(PID, y2 + 0x7d8)
+ Return @ := (y3 + 0x1e4)
+}
+
+getProcessBaseAddress(Handle)
+{
+	return DllCall( A_PtrSize = 4
+                            ? "GetWindowLong"
+                            : "GetWindowLongPtr"
+                        , "Ptr", Handle
+                        , "Int", -6
+                        , "Int64") ; Use Int64 to prevent negative overflow when AHK is 32 bit and target process is 64bit
+     ; If DLL call fails, returned value will = 0
+}   
+
+ReadMemory(PID, MADDRESS)
+{
+	VarSetCapacity(MVALUE,4,0)
+	ProcessHandle := DllCall("OpenProcess", "Int", 24, "Char", 0, "UInt", PID, "UInt")
+	DllCall("ReadProcessMemory", "UInt", ProcessHandle, "Ptr", MADDRESS, "Ptr", &MVALUE, "Uint",4)
+	Loop, 4
+	{
+		result += *(&MVALUE + A_Index-1) << 8*(A_Index-1)
+	}
+	Return result
 }
 ; ~End~ Ultilities Functions.
 ; -------------------------------------------------------------------------
 
-
-; Close Main GUI.
 MainGuiClose:
-	GuiControlGet, GlyphPathDisplay
-	IniWrite, %GlyphPathDisplay%, %A_ScriptDir%/data/configs/launcherconfig.ini, Glyph Folder, Glyph_Folder
-	ExitApp
-Return
+ExitApp

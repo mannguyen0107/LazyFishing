@@ -60,3 +60,9 @@ v1.5.5 (HotFix):
 - Added a better way to detect if the bot is stuck when fishing it will restart itself.
 v1.5.6 (HotFix):
 - Fixed FishingState ReadMemory.
+v1.6:
+- Redesign the bot GUI.
+- Added Nippy fishing method v1.1.
+- Added a new feature which gives the user the choice to choose which account will be fishing, which account will not be fishing. Also, which account will drop boot or decons.
+- Added Log Screen.
+- Redo Boot/Decons bot no more image search.
