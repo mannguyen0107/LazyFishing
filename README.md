@@ -1,5 +1,4 @@
 # LazyFishing
-Ultimate Trove Bot
 ![preview](https://raw.githubusercontent.com/mannguyen0107/LazyFishing/master/preview.gif)
 
 ## Features:
