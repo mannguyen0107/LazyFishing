@@ -128,6 +128,7 @@
 9. Start fishing.
 
 	>  Now go to the **Fishing Bot Tab** and click on **Start All**
+	
 	>  if you want it to start auto drop boot and decons then go to **Boot/Decons Bot Tab** and click on **Start** (When it is dropping boot and decons you will not be able to use your computer). Also, This will ONLY work when you already started fishing bot.
 
 
