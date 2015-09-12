@@ -4,17 +4,19 @@
 ## Features:
 - Auto Fishing 
 
-	> Works in all type of liquid: Water, Lava and Chocolate.
-	> Uses Memory Address to detect when to reel-in.
+	> * Works in all type of liquid: Water, Lava and Chocolate.
+	> * Uses Memory Address to detect when to reel-in.
+	> * Reel-In counter.
 	
 - Multi Account Launcher
 
-	> An Multi Account Loader.
-	> Auto Login.
+	> * An Multi Account Loader.
+	> * Auto Login.
 	
 - Auto Drop Boot and Decons Trophy Fish
 
-	> Auto Throw Boot (ATB) and Auto Decons Trophy Fish (ADF) after X minutes.
+	> * Auto Throw Boot (ATB) and Auto Decons Trophy Fish (ADF) after X minutes.
+	> * You can choose what inventory slots you want to ATB or ADF.
 
 
 ## Changelog:
@@ -35,6 +37,45 @@
 	> * Added a check to see if the script is not run as admin then it will restart and run the script as admin.
 	> * Improve the login system.
 	> * Redo the logic of handling window.
+	> * v1.5.1 (HotFix): 
+		* Fixed a bug where Settings doesn't save the Glyph Version info. 
+	> * v1.5.2 (HotFix): 
+		* Fixed the login system finally got it working correctly.
+	> * v1.5.3 (HotFix):
+		* Fixed a bug where fishing bot randomly stop.
+	> * v1.5.4 (HotFix): 
+		* Change the time when fishing bot check for readmemory to increase the CPU performance.
+	> * v1.5.5 (HotFix): 
+		* Added a better way to detect if the bot is stuck when fishing it will restart itself.
+	> * v1.5.6 (HotFix): 
+		* Fixed FishingState ReadMemory.
+	
+- v1.6:
+
+	> * - Redesign the bot GUI.
+	> * Added Nippy fishing method v1.1.
+	> *  Added a new feature which gives the user the choice to choose which account will be fishing, which account will not be fishing. Also, which account will drop boot or decons.
+	> *  Added Log Screen.
+	> *  Redo Boot/Decons bot no more image search.
+	> * v1.6.1 (HotFix): 
+		* Fixed problem where bot never click on Play button to start the game.
+		* Fixed a possible problem that cause the bot cant start fishing which is the game window didn't get rename.
+		* Added log to when the bot click Play button and changing window name (for debugging purpose).
+
+- v1.7:
+
+	> * Added auto Anti-AFK if the client errors out too much.
+	> * Added a way for users to select which slots they want to drop boot or decons on.
+	> * Added a few bug fix for fishing bot (Thanks to Nippy).
+	> * Added resize game window button, so you could enlarge the game window to see chat trade then you can resize it without relaunch it.
+	> * Clean up un used variables (increases CPU performance)
+	> * Clean up the bot folder. Deleted un use images.
+	> * Seperate code into many sections (for development purpose).
+	> * Added auto shutdown computer or trove.
+	> * v1.7.1 (HotFix):
+		* Fixed Resize All button.
+		* Fixed a bug where it would clear log file when press Ctrl + F1.
+		* Change the selected slot image from cross to tick.
 
 
 ## Installation:
@@ -50,32 +91,29 @@
 
 		> This is the main script of the bot.
 		
-	* **FishingClient.AHK**
+	* A Folder **LFBot**
 
-		> This is the fishing script.
+		> This folder contain all the logic of the bot.
 		
 	* A Folder **data**
 
 		> This folder contain all the necessary files that the bot needs.
 		
 3. Run **LazyFishing.AHK** as Administrator.
-4. Go into the bot Settings and choose the Glyph Version that you are using.
+4. Go to "Login Bot" tab, choose Config then choose the Glyph Version that you are using and its Folder Path.
 
 	> This is very important that you choose the correct Glyph Version.
-
-5. Choose the GLyph Folder Path.
-
-	> Please make sure that you choose the glyph folder path that is appropriate with the Glyph Version you choose in Settings.
+	> Please make sure that you choose the glyph folder path that is appropriate with the Glyph Version you chose.
 
 6. Add your accounts to the Bot.
 
-	> 1. You need to launch the GlyphClient.exe of the Glyph Version that you chose earlier in Settings or just click the button **Launch Glyph Client**.
-	
+	> 1. You need to launch the GlyphClient.exe of the Glyph Version that you chose earlier or just click the button **Launch Glyph Client**.
 	> 2. Login to the account that you want to add.
-	
 	> 3. Click on **Save Current Login**.
+	> 4.  Keep in mind that you might have to re-add your account every 48-72 hours due to Trove system which reset the hash .dat files. 
+	> 5. When you add your account, 2 message box will appear just read it and follow.
 	
-7. Click on **Start All Accounts**.
+7. Click on **Launch All Accounts**.
 
 	> The Bot will automatically login to all the accounts you added please be patient and wait for it to launch all of them.
 	
@@ -89,10 +127,7 @@
 	
 9. Start fishing.
 
-	>  After setting up all your character you can now click on the button **Fishing Start (All Account)** to start fishing.
-	> If you want the Bot to Auto Throw Boot or Auto Decons Fish then click on the button **Boot and Decons Start**
+	>  Now go to the **Fishing Bot Tab** and click on **Start All**
+	>  if you want it to start auto drop boot and decons then go to **Boot/Decons Bot Tab** and click on **Start** (When it is dropping boot and decons you will not be able to use your computer). Also, This will ONLY work when you already started fishing bot.
 
-	
-## Hotkeys:
-> The hotkeys are all configurable via the Settings. You may change the keys by yourself.
 
