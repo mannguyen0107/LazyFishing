@@ -20,7 +20,7 @@ WinSet, TransColor, White, loading
 
 ; -------------------------------------------------------------------------
 ; ~Start~ Declares Global vars.
-Global BotVer := "1.6"
+Global BotVer := "1.6.1"
 Global BDActive
 Global DefaultGlyphPath := "C:\Program Files (x86)\Steam\SteamApps\common\Trove"
 Global ClientWidth
