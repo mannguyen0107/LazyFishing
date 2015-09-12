@@ -70,3 +70,12 @@ v1.6.1 (HotFix):
 - Fixed problem where bot never click on Play button to start the game.
 - Fixed a possible problem that cause the bot cant start fishing which is the game window didn't get rename.
 - Added log to when the bot click Play button and changing window name (for debugging purpose).
+v1.7:
+- Added auto Anti-AFK if the client errors out too much.
+- Added a way for users to select which slots they want to drop boot or decons on.
+- Added a few bug fix for fishing bot (Thanks to Nippy).
+- Added resize game window button, so you could enlarge the game window to see chat trade then you can resize it without relaunch it.
+- Clean up un used variables (increases CPU performance)
+- Clean up the bot folder. Deleted un use images.
+- Seperate code into many sections (for development purpose).
+- Added auto shutdown computer or trove.
