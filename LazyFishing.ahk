@@ -38,11 +38,6 @@ LogPath := % A_ScriptDir . "\data\log\" . LogTimeStamp . ".txt"
 log("Started LazyFishing Bot v" . BotVer, TimeStamp, LogPath)
 Return
 
-
-F1::
-	Reload
-Return
-
 ; -------------------------------------------------------------------------
 ; ~Start~ Buttons that don't belong to any tabs.
 

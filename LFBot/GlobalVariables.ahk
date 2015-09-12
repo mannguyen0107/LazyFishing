@@ -1,4 +1,4 @@
-﻿Global BotVer := "1.7"
+﻿Global BotVer := "1.7.1"
 Global BDActive
 Global ClientWidth
 Global ClientHeight

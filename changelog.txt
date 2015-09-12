@@ -79,3 +79,7 @@ v1.7:
 - Clean up the bot folder. Deleted un use images.
 - Seperate code into many sections (for development purpose).
 - Added auto shutdown computer or trove.
+v1.7.1 (HotFix):
+- Fixed Resize All button.
+- Fixed a bug where it would clear log file when press Ctrl + F1.
+- Change the selected slot image from cross to tick.

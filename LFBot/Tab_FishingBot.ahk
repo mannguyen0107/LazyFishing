@@ -241,7 +241,7 @@ Anti-AFK:
 	{
 		ModifyListView("FishingList", AFKList[a_index, 1], 2, "0")
 		ModifyListView("FishingList", AFKList[a_index, 1], 3, "Unknown")
-		ModifyListView("FishingList", AFKList[a_index, 1], 4, "AFK")
+		ModifyListView("FishingList", AFKList[a_index, 1], 4, "Anti-AFK")
 		HumanPressButton("rctrl", AFKList[a_index, 2])
 	}
 Return

@@ -250,7 +250,7 @@ LoadGUIImgSetSlots()
 				ImgSelectedX := ImgSlotX + 6
 				ImgSelectedY := ImgSlotY_Base + 4
 				Gui, Main:Add, Picture, x%ImgSlotX% y%ImgSlotY_Base% w31 h31 gSlot%a_index%, %A_ScriptDir%/data/img/inv/slots/%a_index%.png
-				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/cross.png
+				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/tick.png
 			}
 			else if (a_index >5 and a_index <= 10)
 			{
@@ -259,7 +259,7 @@ LoadGUIImgSetSlots()
 				ImgSelectedX := ImgSlotX + 6
 				ImgSelectedY := ImgSlotY + 4
 				Gui, Main:Add, Picture, x%ImgSlotX% y%ImgSlotY% w31 h31 gSlot%a_index%, %A_ScriptDir%/data/img/inv/slots/%a_index%.png
-				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/cross.png
+				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/tick.png
 			}
 			else if (a_index >10 and a_index <= 15)
 			{
@@ -268,7 +268,7 @@ LoadGUIImgSetSlots()
 				ImgSelectedX := ImgSlotX + 6
 				ImgSelectedY := ImgSlotY + 4
 				Gui, Main:Add, Picture, x%ImgSlotX% y%ImgSlotY% w31 h31 gSlot%a_index%, %A_ScriptDir%/data/img/inv/slots/%a_index%.png
-				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/cross.png
+				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/tick.png
 			}
 			else if (a_index >15 and a_index <= 20)
 			{	
@@ -277,7 +277,7 @@ LoadGUIImgSetSlots()
 				ImgSelectedX := ImgSlotX + 6
 				ImgSelectedY := ImgSlotY + 4
 				Gui, Main:Add, Picture, x%ImgSlotX% y%ImgSlotY% w31 h31 gSlot%a_index%, %A_ScriptDir%/data/img/inv/slots/%a_index%.png
-				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/cross.png
+				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/tick.png
 			}
 			else if (a_index >20 and a_index <= 25)
 			{	
@@ -286,7 +286,7 @@ LoadGUIImgSetSlots()
 				ImgSelectedX := ImgSlotX + 6
 				ImgSelectedY := ImgSlotY + 4
 				Gui, Main:Add, Picture, x%ImgSlotX% y%ImgSlotY% w31 h31 gSlot%a_index%, %A_ScriptDir%/data/img/inv/slots/%a_index%.png
-				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/cross.png
+				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/tick.png
 			}
 			else if (a_index >25 and a_index <= 30)
 			{	
@@ -295,7 +295,7 @@ LoadGUIImgSetSlots()
 				ImgSelectedX := ImgSlotX + 6
 				ImgSelectedY := ImgSlotY + 4
 				Gui, Main:Add, Picture, x%ImgSlotX% y%ImgSlotY% w31 h31 gSlot%a_index%, %A_ScriptDir%/data/img/inv/slots/%a_index%.png
-				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/cross.png
+				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/tick.png
 			}
 			else if (a_index >30 and a_index <= 35)
 			{	
@@ -304,7 +304,7 @@ LoadGUIImgSetSlots()
 				ImgSelectedX := ImgSlotX + 6
 				ImgSelectedY := ImgSlotY + 4
 				Gui, Main:Add, Picture, x%ImgSlotX% y%ImgSlotY% w31 h31 gSlot%a_index%, %A_ScriptDir%/data/img/inv/slots/%a_index%.png
-				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/cross.png
+				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/tick.png
 			}
 			else if (a_index >35 and a_index <= 40)
 			{	
@@ -313,7 +313,7 @@ LoadGUIImgSetSlots()
 				ImgSelectedX := ImgSlotX + 6
 				ImgSelectedY := ImgSlotY + 4
 				Gui, Main:Add, Picture, x%ImgSlotX% y%ImgSlotY% w31 h31 gSlot%a_index%, %A_ScriptDir%/data/img/inv/slots/%a_index%.png
-				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/cross.png
+				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/tick.png
 			}
 			else if (a_index >40 and a_index <= 45)
 			{	
@@ -322,7 +322,7 @@ LoadGUIImgSetSlots()
 				ImgSelectedX := ImgSlotX + 6
 				ImgSelectedY := ImgSlotY + 4
 				Gui, Main:Add, Picture, x%ImgSlotX% y%ImgSlotY% w31 h31 gSlot%a_index%, %A_ScriptDir%/data/img/inv/slots/%a_index%.png
-				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/cross.png
+				Gui, Main:Add, Picture, x%ImgSelectedX% y%ImgSelectedY% w21 h22 BackgroundTrans vSelected%a_index% gSlot%a_index%, %A_ScriptDir%/data/img/inv/tick.png
 			}
 		}
 	Return
@@ -425,7 +425,7 @@ ResizeAll:
 	WinGet, ClientList, List, ahk_exe trove.exe
 	Loop, %ClientList%
 	{	
-		WinGet, PID, PID, ahk_id %A_Index%
+		WinGet, PID, PID, % "ahk_id" ClientList%A_Index%
 		WinMove, ahk_pid %PID%, , , , %ClientWidth%, %ClientHeight%
 	}
 Return
