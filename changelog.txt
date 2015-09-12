@@ -66,3 +66,7 @@ v1.6:
 - Added a new feature which gives the user the choice to choose which account will be fishing, which account will not be fishing. Also, which account will drop boot or decons.
 - Added Log Screen.
 - Redo Boot/Decons bot no more image search.
+v1.6.1 (HotFix):
+- Fixed problem where bot never click on Play button to start the game.
+- Fixed a possible problem that cause the bot cant start fishing which is the game window didn't get rename.
+- Added log to when the bot click Play button and changing window name (for debugging purpose).

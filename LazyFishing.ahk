@@ -529,6 +529,7 @@ AccountList:
 			NewFMode := "Off"
 			IniWrite, %NewFMode%, %A_ScriptDir%/data/savedlogins/%LoginName%/Fishing.ini, Fishing, Mode
 			ModifyListView("AccountList", LoginName, 2, NewFMode)
+			FishingListReload()
 			log("Fishing is turned off for " . LoginName, TimeStamp, LogPath)
 		}
 		else
@@ -536,6 +537,7 @@ AccountList:
 			NewFMode := "On"
 			IniWrite, %NewFMode%, %A_ScriptDir%/data/savedlogins/%LoginName%/Fishing.ini, Fishing, Mode
 			ModifyListView("AccountList", LoginName, 2, NewFMode)
+			FishingListReload()
 			log("Fishing is turned on for " . LoginName, TimeStamp, LogPath)
 		}
 	}
@@ -565,7 +567,7 @@ AutoLogin(GlyphFolder, LoginName, GlyphVer)
 	
 	LaunchGlyph(GlyphFolder)
 		
-	sleep, 5000
+	sleep, 6000
 	ClickPlay()
 	Sleep, 5000
 	SetWinTitleAtLaunch(LoginName)
@@ -603,29 +605,35 @@ AccountListReload()
 ; Click Play Function.
 ClickPlay()
 {
+	Global TimeStamp
+	Global LogPath
+	log("Waiting to click Play button...", TimeStamp, LogPath)
 	; Click on Play
 	Loop
 	{
 		WinActivate, Glyph
-		Imagesearch, LoginX, LoginY, 0, 0, A_ScreenWidth, A_ScreenHeight, *50 %A_ScriptDir%\data\img\glyph\playglyph.png
-		if ErrorLevel = 0
+		MouseClick, Left, 470, 530
+		ifWinExist, Trove
 		{
-			MouseClick, Left, %LoginX%, %LoginY%
-			;ControlClick, x%LoginX% y%LoginY%, Glyph
-			Sleep, 200
-			break
+			Break
 		}
 	}
+	log("Done. Play button has clicked, the game has launch.", TimeStamp, LogPath)
 	Return
 }
 
 SetWinTitleAtLaunch(LoginName)
 {
+	Global TimeStamp
+	Global LogPath
+	log("Renaming Trove window to the account name: " . LoginName . " ...", TimeStamp, LogPath)
 	Global ClientWidth
 	Global ClientHeight
 	
+	WinWait, Trove
 	WinSetTitle, Trove, , %LoginName% 
 	WinMove, %LoginName%, , , , %ClientWidth%, %ClientHeight%
+	log("Finish rename Trove window to: " . LoginName, TimeStamp, LogPath)
 }
 ; ~End~ Login System.
 ; -------------------------------------------------------------------------
@@ -796,14 +804,17 @@ FishBiteMemoryScan:
 				If (BotList[index, 12] = 1) ;Water type found scan only water type
 				{
 					CaughtWater := ReadMemory(BotList[index, 1], BotList[index, 4])
+					ModifyListView("FishingList", FishingAccountName, 3, "Water")
 				}	
 				Else If (BotList[index, 12] = 2)	;Lava type found scan only lava type
 				{
 					CaughtLava := ReadMemory(BotList[index, 1], BotList[index, 5])
+					ModifyListView("FishingList", FishingAccountName, 3, "Lava")
 				}	
 				Else If (BotList[index, 12] = 3) ;Choco type found only scan Choco type
 				{
 					CaughtChoco := ReadMemory(BotList[index, 1], BotList[index, 6])
+					ModifyListView("FishingList", FishingAccountName, 3, "Chocolate")
 				}	
 				Else 
 				{
