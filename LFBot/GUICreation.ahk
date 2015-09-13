@@ -57,9 +57,6 @@ Gui, Main:Add, Text, x30 y490 h20 vBDCDTime, 00:00:00
 
 Gui, Main:Font, S10 Q4, Verdana
 Gui, Main:Add, StatusBar
-SB_SetParts(20, 450, 80)
-SB_SetIcon(A_ScriptDir . "/data/img/main.ico", 1, 1) 
-SB_SetText("By: TaeJim", 3)
 
 ; Misc Tab
 Gui, Tab, 5, 1

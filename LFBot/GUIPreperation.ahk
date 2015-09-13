@@ -72,5 +72,9 @@ GuiControl, Main:, SDHour, %SDTimeH%
 GuiControl, Main:, SDMin, %SDTimeM%
 GuiControl, Main:, SDSec, %SDTimeS%
 
+SB_SetParts(20, 450, 80)
+SB_SetIcon(A_ScriptDir . "/data/img/main.ico", 1, 1) 
+SB_SetText("By: TaeJim", 3)
+
 IniRead, ClientWidth, %A_ScriptDir%/data/configs/loginsystem.ini, ClientSize, Width
 IniRead, ClientHeight, %A_ScriptDir%/data/configs/loginsystem.ini, ClientSize, Height

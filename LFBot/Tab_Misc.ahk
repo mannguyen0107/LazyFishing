@@ -452,15 +452,15 @@ SDStart:
 	
 	SDTimeSec := (SDHour*3600) + (SDMin*60) + SDSec
 	SetTimer, SDUpdateOSD, 200
-	StartTime = %A_Now%
-	EndTime = %A_Now%
-	EnvAdd EndTime, SDTimeSec, seconds
-	EnvSub StartTime, EndTime, seconds
-	StartTime := Abs(StartTime)
-	perc := 0 ; Resets percentage to 0, otherwise this loop never sees the counter reset
+	SDStartTime = %A_Now%
+	SDEndTime = %A_Now%
+	EnvAdd SDEndTime, SDTimeSec, seconds
+	EnvSub SDStartTime, SDEndTime, seconds
+	SDStartTime := Abs(SDStartTime)
+	SDPercent := 0 ; Resets percentage to 0, otherwise this loop never sees the counter reset
 	Loop
 	{
-		if perc = 100
+		if SDPercent = 100
 		{
 			break ; Terminate the loop
 		} 
@@ -479,7 +479,12 @@ SDStart:
 		if (ShutdownType = "Trove")
 		{
 			log("Auto shutdown time's up going to shutdown all Trove window now.", TimeStamp, LogPath)
-			WinClose, ahk_exe trove.exe
+			TotalClientToShutdown := BotList.MaxIndex()
+			Loop, %TotalClientsOnList%
+			{
+				SDPID := BotList[a_index, 15]
+				Process, Close, %SDPID%
+			}
 		}
 		else
 		{
@@ -493,18 +498,18 @@ Return
 SDUpdateOSD:
 	if (SDActive = 0)
 	{
-		perc = 100
+		SDPercent = 100
 		SetTimer, SDUpdateOSD, Off
 		GuiControl, Main:, SDCDTime, 00:00:00
 	}
 	else 
 	{
-		mysec := EndTime
-		EnvSub, mysec, %A_Now%, seconds
-		GuiControl, Main:, SDCDTime, % FormatSeconds(mysec)
-		perc := ((StartTime-mysec)/StartTime)*100
-		perc := Floor(perc)
-		If (perc = 100)
+		SDTimeNow := SDEndTime
+		EnvSub, SDTimeNow, %A_Now%, seconds
+		GuiControl, Main:, SDCDTime, % FormatSeconds(SDTimeNow)
+		SDPercent := ((SDStartTime-SDTimeNow)/SDStartTime)*100
+		SDPercent := Floor(SDPercent)
+		If (SDPercent = 100)
 		{
 			SetTimer, SDUpdateOSD, Off
 		}

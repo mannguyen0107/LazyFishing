@@ -90,15 +90,15 @@ BDStart:
 		IniRead, GetBDTime, %A_ScriptDir%/data/configs/bdsystem.ini, SessionDelay, Time
 		SetTimer, BDUpdateOSD, 200
 		Periodsec := GetBDTime/1000
-		StartTime = %A_Now%
-		EndTime = %A_Now%
-		EnvAdd EndTime, Periodsec, seconds
-		EnvSub StartTime, EndTime, seconds
-		StartTime := Abs(StartTime)
-		perc := 0 ; Resets percentage to 0, otherwise this loop never sees the counter reset
+		BDStartTime = %A_Now%
+		BDEndTime = %A_Now%
+		EnvAdd BDEndTime, Periodsec, seconds
+		EnvSub BDStartTime, BDEndTime, seconds
+		BDStartTime := Abs(BDStartTime)
+		BDPercent := 0 ; Resets percentage to 0, otherwise this loop never sees the counter reset
 		Loop
 		{
-			if perc = 100
+			if BDPercent = 100
 			{
 				break ; Terminate the loop
 			} 
@@ -113,18 +113,18 @@ Return
 BDUpdateOSD:
 	if (BDActive = 0)
 	{
-		perc = 100
+		BDPercent = 100
 		SetTimer, BDUpdateOSD, Off
 		GuiControl, Main:, BDCDTime, 00:00:00
 	}
 	else 
 	{
-		mysec := EndTime
-		EnvSub, mysec, %A_Now%, seconds
-		GuiControl, Main:, BDCDTime, % FormatSeconds(mysec)
-		perc := ((StartTime-mysec)/StartTime)*100
-		perc := Floor(perc)
-		If (perc = 100)
+		BDTimeNow := BDEndTime
+		EnvSub, BDTimeNow, %A_Now%, seconds
+		GuiControl, Main:, BDCDTime, % FormatSeconds(BDTimeNow)
+		BDPercent := ((BDStartTime-BDTimeNow)/BDStartTime)*100
+		BDPercent := Floor(BDPercent)
+		If (BDPercent = 100)
 		{
 			SetTimer, BDUpdateOSD, Off
 		}

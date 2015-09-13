@@ -101,34 +101,35 @@ Return
 FishBiteMemoryScan:
     for index, element in BotList
     {
-		FishingAccountName := BotList[index, 15]
+		this_index := index ; keep the index static
+		FishingAccountName := BotList[this_index, 15]
         ;Setting Current time of scan. Used to compair for bot error hang
         CurrentTime = %a_now%
         WinID :=
         ;Checking to make sure the next scan that the client is running. If not found it will auto remove form the list and move on to next.
-        WinID := BotList[index, 2]
+        WinID := BotList[this_index, 2]
         IfWinNotExist, ahk_id %WinID%
 		{
 			log(FishingAccountName . " account no longer found. It will now get remove from fishing.", TimeStamp, LogPath)
 			ModifyListView("FishingList", FishingAccountName, 2, "0")
 			ModifyListView("FishingList", FishingAccountName, 3, "Unknown")
 			ModifyListView("FishingList", FishingAccountName, 4, "Idle")
-			BotList.Remove(index)
+			BotList.Remove(this_index)
 			Return
 		}
 
-        ; if (BotList[index, 13] = 0) 
+        ; if (BotList[this_index, 13] = 0) 
         ; {
 			; ModifyListView("FishingList", FishingAccountName, 3, "Unknown")
 			; ModifyListView("FishingList", FishingAccountName, 4, "Idle")
         ; }
         
-		if (BotList[index, 13] = 0) ; Checking to make sure the fishing flag and the recast flag are both set to 1 being on.
+		if (BotList[this_index, 13] = 0) ; Checking to make sure the fishing flag and the recast flag are both set to 1 being on.
 		{
 			ModifyListView("FishingList", FishingAccountName, 4, "Fishing")
 			; Checking last cast on record with current time.
 			CurrentTime := 
-			LastCastTime := BotList[index, 8]
+			LastCastTime := BotList[this_index, 8]
 			EnvSub, CurrentTime, LastCastTime, Seconds ; Converting last last cast time to Seconds.
 
 			; Error handling to check to make sure it is still fishing.
@@ -136,35 +137,35 @@ FishBiteMemoryScan:
 			{
 				FishingState := "0"
 				;Checking all 3 fishing states.
-				CaughtFishingStateWater := ReadMemory(BotList[index, 1], BotList[index, 9])
-				CaughtFishingStateLava := ReadMemory(BotList[index, 1], BotList[index, 10])
-				CaughtFishingStateChoco := ReadMemory(BotList[index, 1], BotList[index, 11])
+				CaughtFishingStateWater := ReadMemory(BotList[this_index, 1], BotList[this_index, 9])
+				CaughtFishingStateLava := ReadMemory(BotList[this_index, 1], BotList[this_index, 10])
+				CaughtFishingStateChoco := ReadMemory(BotList[this_index, 1], BotList[this_index, 11])
 
 				; If fishing state = 1 ignores the error logging. 15
 				If (CaughtFishingStateWater = 1 or CaughtFishingStateLava = 1 or CaughtFishingStateChoco = 1)
 				{
 					FishingState := "1"
-					BotList[index, 14] := "0" ;Since fishing is detected it will wipe out the Error Count.
+					BotList[this_index, 14] := "0" ;Since fishing is detected it will wipe out the Error Count.
 				}
 
 				If (FishingState = 0)
 				{
-					If (BotList[index, 13] <> 1) ; If recast is not 1 it trigers the Error Report. 
+					If (BotList[this_index, 13] <> 1) ; If recast is not 1 it trigers the Error Report. 
 					{ 
 						SetTimer, Recast, Off
-						BotList[index, 14] := BotList[index, 14] + 1 ; Adds 1 for each time it is found not fishing. v1.2 Var Cleanup
-						BotList[index, 13] := 1 ;Turning on the recast flag.
+						BotList[this_index, 14] := BotList[this_index, 14] + 1 ; Adds 1 for each time it is found not fishing. v1.2 Var Cleanup
+						BotList[this_index, 13] := 1 ;Turning on the recast flag.
 						SetTimer, Recast, 4000
-						if (BotList[index, 14] > 2 && BotList[index, 14] < 9)
+						if (BotList[this_index, 14] > 2 && BotList[this_index, 14] < 9)
 						{
-							log("the account: " . BotList[index, 15] . " seems to be not be fishing. Possible causes could be the client/character is frozen, full inventory or no more lures left. Please check on the account.", TimeStamp, LogPath)
+							log("the account: " . BotList[this_index, 15] . " seems to be not be fishing. Possible causes could be the client/character is frozen, full inventory or no more lures left. Please check on the account.", TimeStamp, LogPath)
 						}
-						else if (BotList[index, 14] > 9) ; Checking to see if it erros = 10+ if so automatic stop on tht client.
+						else if (BotList[this_index, 14] > 9) ; Checking to see if it erros = 10+ if so automatic stop on tht client.
 						{
 							;Automatic Stop
-							AFKList.Insert(Array(BotList[index, 15], BotList[index, 1]))
-							log("the account: " . BotList[index, 15] . " had more than 10 errors in a row, it will now be move to Anti-AFK list.", TimeStamp, LogPath)
-							BotList.Remove(index)
+							AFKList.Insert(Array(BotList[this_index, 15], BotList[this_index, 1]))
+							log("the account: " . BotList[this_index, 15] . " had more than 10 errors in a row, it will now be move to Anti-AFK list.", TimeStamp, LogPath)
+							BotList.Remove(this_index)
 						}
 					}
 				}
@@ -173,24 +174,24 @@ FishBiteMemoryScan:
 			;Memory scan for current client to check for fish bite
 			If (12 < CurrentTime) ;Wont start a memory scan till 12Seconds has passed. This is to Lower cpu usage.
 			{
-				If (BotList[index, 12] = 1) ;Water type found scan only water type
+				If (BotList[this_index, 12] = 1) ;Water type found scan only water type
 				{
-					CaughtWater := ReadMemory(BotList[index, 1], BotList[index, 4])
+					CaughtWater := ReadMemory(BotList[this_index, 1], BotList[this_index, 4])
 				}	
-				Else If (BotList[index, 12] = 2)	;Lava type found scan only lava type
+				Else If (BotList[this_index, 12] = 2)	;Lava type found scan only lava type
 				{
-					CaughtLava := ReadMemory(BotList[index, 1], BotList[index, 5])
+					CaughtLava := ReadMemory(BotList[this_index, 1], BotList[this_index, 5])
 				}	
-				Else If (BotList[index, 12] = 3) ;Choco type found only scan Choco type
+				Else If (BotList[this_index, 12] = 3) ;Choco type found only scan Choco type
 				{
-					CaughtChoco := ReadMemory(BotList[index, 1], BotList[index, 6])
+					CaughtChoco := ReadMemory(BotList[this_index, 1], BotList[this_index, 6])
 				}	
 				Else 
 				{
 					;Unknown type so we can all 3. This will use more cpu.
-					CaughtWater := ReadMemory(BotList[index, 1], BotList[index, 4])
-					CaughtLava := ReadMemory(BotList[index, 1], BotList[index, 5])
-					CaughtChoco := ReadMemory(BotList[index, 1], BotList[index, 6])
+					CaughtWater := ReadMemory(BotList[this_index, 1], BotList[this_index, 4])
+					CaughtLava := ReadMemory(BotList[this_index, 1], BotList[this_index, 5])
+					CaughtChoco := ReadMemory(BotList[this_index, 1], BotList[this_index, 6])
 				}
 			} 
 			Else 
@@ -204,14 +205,14 @@ FishBiteMemoryScan:
 			If (CaughtWater = 1 or CaughtLava = 1 or CaughtChoco = 1)
 			{
 				;Checking to see if the bot is already recasting. And if so it will ignore below.
-				If (BotList[index, 13] <> 1) 
+				If (BotList[this_index, 13] <> 1) 
 				{
 					SetTimer, Recast, Off
-					HumanPressButton("f", BotList[index, 1])
+					HumanPressButton("f", BotList[this_index, 1])
 					Sleep 200
-					BotList[index, 13] := 1   ;Turning on the recast flag.
-					BotList[index, 16] := BotList[index, 16] + 1 ;Padding the reeled in Counter.
-					ReelIn := BotList[index, 16]
+					BotList[this_index, 13] := 1   ;Turning on the recast flag.
+					BotList[this_index, 16] := BotList[this_index, 16] + 1 ;Padding the reeled in Counter.
+					ReelIn := BotList[this_index, 16]
 					ModifyListView("FishingList", FishingAccountName, 2, ReelIn)
 					SetTimer, Recast, 2000
 				}
@@ -374,19 +375,16 @@ FishingStopSelected:
 	ModifyListView("FishingList", LoginName, 3, "Unkown")
 	ModifyListView("FishingList", LoginName, 4, "Idle")
 	
-	WinGet, PID, PID, %LoginName%
-
-    for index, element in BotList
-    {
-        If (BotList[index][1] = PID)
-            {
-				log("Stopped fishing for " . BotList[index, 15], TimeStamp, LogPath)
-				BotList.Remove(index)
-                Return
-            }
-    }
-	
 	TotalClientsOnList := BotList.MaxIndex()
+	Loop, %TotalClientsOnList%
+	{
+		if (BotList[a_index, 15] = LoginName)
+		{
+			log("Stopped fishing for " . BotList[a_index, 15], TimeStamp, LogPath)
+			BotList.Remove(a_index)
+		}
+	}
+	
 	if (TotalClientsOnList = 0)
 	{
 		CheckSetTimer := 0
