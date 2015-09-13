@@ -1,5 +1,5 @@
 # LazyFishing
-![preview](https://raw.githubusercontent.com/mannguyen0107/LazyFishing/master/preview.gif)
+![preview](https://raw.githubusercontent.com/mannguyen0107/LazyFishing/d1a5e4cb5e341e155aa996a3dd3dce82b446d3d9/preview.gif)
 
 ## Features:
 - Auto Fishing 
@@ -76,6 +76,11 @@
 		* Fixed Resize All button.
 		* Fixed a bug where it would clear log file when press Ctrl + F1.
 		* Change the selected slot image from cross to tick.
+	> * v1.7.2 (HotFix):
+		* Fixed count down clock of shutdown.
+		* Fixed a bug where when you stop fishing on selected account all the others account would stop with it.
+		* Improve fishing bot (thanks Nippy).
+		* Fixed auto shutdown trove not closing all window of trove running.
 
 
 ## Installation:
