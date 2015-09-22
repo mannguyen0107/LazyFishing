@@ -1,5 +1,5 @@
 # LazyFishing
-![preview](https://raw.githubusercontent.com/mannguyen0107/LazyFishing/d1a5e4cb5e341e155aa996a3dd3dce82b446d3d9/preview.gif)
+![preview](https://raw.githubusercontent.com/mannguyen0107/LazyFishing/master/preview.gif)
 
 ## Features:
 - Auto Fishing 
@@ -82,6 +82,20 @@
 		* Improve fishing bot (thanks Nippy).
 		* Fixed auto shutdown trove not closing all window of trove running.
 
+- v1.8:
+
+	> * Added PushBullet Notification System. You are now able to check on all your accounts 24/7 without the need of look at your computer.
+	> * Added ReadMe
+	> * Fixed countdown clocks.
+	> * Fixed a bug with fishing Stop Selected Account.
+	> * Improve boot drop.
+	> * Added edit for time before memory scan start so user can change the setting for x2 fishing week.
+	> * Fixed a bug where the mouse get freeze if the user have wrong settings when launch accounts.
+	> * Change the default size of Trove window it is now smaller, you guys might be able to run more accounts.
+	> * Added a resize button incase the bot didnt resize your game window correctly.
+	> * Separate boot drop and decons out from the main script so it doesnt conflict with fishing bot.
+	> * Fixed how the bot reload fishing list when you add a new account that it could make the fishing info of current account get reset.
+	> * Fixed log screen timer, it will now shows the correct time.
 
 ## Installation:
 1. Download and install AutoHotKey from the [official website](http://www.autohotkey.com/).
@@ -134,6 +148,25 @@
 
 	>  Now go to the **Fishing Bot Tab** and click on **Start All**
 	
-	>  if you want it to start auto drop boot and decons then go to **Boot/Decons Bot Tab** and click on **Start** (When it is dropping boot and decons you will not be able to use your computer). Also, This will ONLY work when you already started fishing bot.
+10. Start auto throw boot and auto decons.
 
+	>  if you want it to start auto drop boot and decons then go to **Boot/Decons Bot Tab** and click on **Start** (When it is dropping boot and decons you will not be able to use your computer). Also, This will **ONLY** work when you already started fishing bot.
+	
+11. Start notification system.
+
+	> If you want to check on all of your bot accounts without the need of looking at your
+	computer then:
+		* Go to PushBullet website at (https://www.pushbullet.com) and register.
+		* Download PushBullet app on your smart phone.
+		* Login to PushBullet on your smartphone.
+		* Go to your browser and login into PushBullet website. Then go to settings and
+		under Account you should see Access Token.
+		* Copy the Access Token and paste it to the Access Token in Notify Tab of 
+		LazyFishing.
+		* Change the settings of the Notification system to your liking and click on
+		Save Settings.
+		* Click on Test Token and wait abit to see if you receive a new note on PushBullet.
+		If you do receive it that means your token is working. If you DO NOT receive any new
+		note then go to the Log Screen and check out what's going on.
+		* Now after set everything up just click Enable.
 
