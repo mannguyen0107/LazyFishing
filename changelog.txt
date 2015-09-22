@@ -88,4 +88,16 @@ v1.7.2 (HotFix):
 - Fixed a bug where when you stop fishing on selected account all the others account would stop with it.
 - Improve fishing bot (thanks Nippy).
 - Fixed auto shutdown trove not closing all window of trove running.
-- Added a timer how long the bot have been running since opened.
+v1.8:
+- Added PushBullet Notification System. You are now able to check on all your accounts 24/7 without the need of look at your computer.
+- Added ReadMe
+- Fixed countdown clocks.
+- Fixed a bug with fishing Stop Selected Account.
+- Improve boot drop.
+- Added edit for time before memory scan start so user can change the setting for x2 fishing week.
+- Fixed a bug where the mouse get freeze if the user have wrong settings when launch accounts.
+- Change the default size of Trove window it is now smaller, you guys might be able to run more accounts.
+- Added a resize button incase the bot didnt resize your game window correctly.
+- Separate boot drop and decons out from the main script so it doesnt conflict with fishing bot.
+- Fixed how the bot reload fishing list when you add a new account that it could make the fishing info of current account get reset.
+- Fixed log screen timer, it will now shows the correct time.

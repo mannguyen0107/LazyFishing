@@ -1,5 +1,5 @@
 ﻿FishingStartAll:
-	log("Starting fishing on all accounts...", TimeStamp, LogPath)
+	log("Starting fishing on all accounts...", LogPath)
 	if (CheckSetTimer = 0)
 	{
 		SetTimer, FishBiteMemoryScan, 1000
@@ -89,13 +89,16 @@
 			{
 				LiquidType = Unknown
 			}
-			ModifyListView("FishingList", A_LoopFileName, 3, LiquidType)
-			ModifyListView("FishingList", A_LoopFileName, 4, "Fishing")
-			log("Started fishing for " . A_LoopFileName, TimeStamp, LogPath)
+			FormatTime, FishingStartTime, StartTime, dd.MM.yyyy HH:mm:ss
+			ModifyListView("FishingList", A_LoopFileName, 2, FishingStartTime)
+			ModifyListView("FishingList", A_LoopFileName, 4, LiquidType)
+			ModifyListView("FishingList", A_LoopFileName, 5, "Fishing")
+			ModifyListView("FishingList", A_LoopFileName, 6, "Unknown")
+			log("Started fishing for " . A_LoopFileName, LogPath)
 			TotalClients++
 		}
 	}
-	log("Finish started fishing on all accounts. Total account started: " . TotalClients, TimeStamp, LogPath)
+	log("Finish started fishing on all accounts. Total account started: " . TotalClients, LogPath)
 Return
 
 FishBiteMemoryScan:
@@ -103,30 +106,31 @@ FishBiteMemoryScan:
     {
 		this_index := index ; keep the index static
 		FishingAccountName := BotList[this_index, 15]
-        ;Setting Current time of scan. Used to compair for bot error hang
-        CurrentTime = %a_now%
         WinID :=
         ;Checking to make sure the next scan that the client is running. If not found it will auto remove form the list and move on to next.
         WinID := BotList[this_index, 2]
         IfWinNotExist, ahk_id %WinID%
 		{
-			log(FishingAccountName . " account no longer found. It will now get remove from fishing.", TimeStamp, LogPath)
-			ModifyListView("FishingList", FishingAccountName, 2, "0")
-			ModifyListView("FishingList", FishingAccountName, 3, "Unknown")
-			ModifyListView("FishingList", FishingAccountName, 4, "Idle")
+			PB_PushNote(GetToken, "Error", "the account: " . FishingAccountName . " no longer found. It will now get remove from fishing.")
+			log(FishingAccountName . " account no longer found. It will now get remove from fishing.", LogPath)
+			ModifyListView("FishingList", FishingAccountName, 2, "Unknown")
+			ModifyListView("FishingList", FishingAccountName, 3, "0")
+			ModifyListView("FishingList", FishingAccountName, 4, "Unknown")
+			ModifyListView("FishingList", FishingAccountName, 5, "Idle")
+			ModifyListView("FishingList", FishingAccountName, 6, "Unknown")
 			BotList.Remove(this_index)
 			Return
 		}
 
         ; if (BotList[this_index, 13] = 0) 
         ; {
-			; ModifyListView("FishingList", FishingAccountName, 3, "Unknown")
-			; ModifyListView("FishingList", FishingAccountName, 4, "Idle")
+			; ModifyListView("FishingList", FishingAccountName, 4, "Unknown")
+			; ModifyListView("FishingList", FishingAccountName, 5, "Idle")
         ; }
         
-		if (BotList[this_index, 13] = 0) ; Checking to make sure the fishing flag and the recast flag are both set to 1 being on.
+		if (BotList[this_index, 13] = 0) ; Checking to make sure the recast flag is set to 1 being on.
 		{
-			ModifyListView("FishingList", FishingAccountName, 4, "Fishing")
+			ModifyListView("FishingList", FishingAccountName, 5, "Fishing")
 			; Checking last cast on record with current time.
 			CurrentTime := 
 			LastCastTime := BotList[this_index, 8]
@@ -155,16 +159,22 @@ FishBiteMemoryScan:
 						SetTimer, Recast, Off
 						BotList[this_index, 14] := BotList[this_index, 14] + 1 ; Adds 1 for each time it is found not fishing. v1.2 Var Cleanup
 						BotList[this_index, 13] := 1 ;Turning on the recast flag.
-						SetTimer, Recast, 4000
-						if (BotList[this_index, 14] > 2 && BotList[this_index, 14] < 9)
+						SetTimer, Recast, 2000
+						if (BotList[this_index, 14] > 2 && BotList[this_index, 14] <= 9)
 						{
-							log("the account: " . BotList[this_index, 15] . " seems to be not be fishing. Possible causes could be the client/character is frozen, full inventory or no more lures left. Please check on the account.", TimeStamp, LogPath)
+							if (BotList[this_index, 14] = 3)
+							{
+								PB_PushNote(GetToken, "Error", "the account: " . BotList[this_index, 15] . " seems to be not fishing. Possible causes could be the client/character is frozen, full inventory or no more lures left. Please check on the account.")
+							}
+							log("the account: " . BotList[this_index, 15] . " seems to be not be fishing. Possible causes could be the client/character is frozen, full inventory or no more lures left. Please check on the account.", LogPath)
 						}
 						else if (BotList[this_index, 14] > 9) ; Checking to see if it erros = 10+ if so automatic stop on tht client.
 						{
 							;Automatic Stop
-							AFKList.Insert(Array(BotList[this_index, 15], BotList[this_index, 1]))
-							log("the account: " . BotList[this_index, 15] . " had more than 10 errors in a row, it will now be move to Anti-AFK list.", TimeStamp, LogPath)
+							PB_PushNote(GetToken, "Error", "the account: " . BotList[this_index, 15] . " had more than 10 errors in a row, it will now be move to Anti-AFK list.")
+							log("the account: " . BotList[this_index, 15] . " had more than 10 errors in a row, it will now be move to Anti-AFK list.", LogPath)
+							AFKTime := a_now
+							AFKList.Insert(Array(BotList[this_index, 15], BotList[this_index, 1], AFKTime))
 							BotList.Remove(this_index)
 						}
 					}
@@ -172,23 +182,27 @@ FishBiteMemoryScan:
 			}
 
 			;Memory scan for current client to check for fish bite
-			If (12 < CurrentTime) ;Wont start a memory scan till 12Seconds has passed. This is to Lower cpu usage.
+			If (LoadScanTime < CurrentTime) ;Wont start a memory scan till 12Seconds has passed. This is to Lower cpu usage.
 			{
 				If (BotList[this_index, 12] = 1) ;Water type found scan only water type
 				{
+					ModifyListView("FishingList", FishingAccountName, 4, "Water")
 					CaughtWater := ReadMemory(BotList[this_index, 1], BotList[this_index, 4])
 				}	
 				Else If (BotList[this_index, 12] = 2)	;Lava type found scan only lava type
 				{
+					ModifyListView("FishingList", FishingAccountName, 4, "Lava")
 					CaughtLava := ReadMemory(BotList[this_index, 1], BotList[this_index, 5])
 				}	
 				Else If (BotList[this_index, 12] = 3) ;Choco type found only scan Choco type
 				{
+					ModifyListView("FishingList", FishingAccountName, 4, "Chocolate")
 					CaughtChoco := ReadMemory(BotList[this_index, 1], BotList[this_index, 6])
 				}	
 				Else 
 				{
 					;Unknown type so we can all 3. This will use more cpu.
+					ModifyListView("FishingList", FishingAccountName, 4, "Unknown")
 					CaughtWater := ReadMemory(BotList[this_index, 1], BotList[this_index, 4])
 					CaughtLava := ReadMemory(BotList[this_index, 1], BotList[this_index, 5])
 					CaughtChoco := ReadMemory(BotList[this_index, 1], BotList[this_index, 6])
@@ -208,12 +222,13 @@ FishBiteMemoryScan:
 				If (BotList[this_index, 13] <> 1) 
 				{
 					SetTimer, Recast, Off
+					BotList[this_index, 8] := a_now
 					HumanPressButton("f", BotList[this_index, 1])
 					Sleep 200
 					BotList[this_index, 13] := 1   ;Turning on the recast flag.
 					BotList[this_index, 16] := BotList[this_index, 16] + 1 ;Padding the reeled in Counter.
-					ReelIn := BotList[this_index, 16]
-					ModifyListView("FishingList", FishingAccountName, 2, ReelIn)
+					; ReelIn := BotList[this_index, 16]
+					ModifyListView("FishingList", FishingAccountName, 3, BotList[this_index, 16])
 					SetTimer, Recast, 2000
 				}
 			}
@@ -240,15 +255,17 @@ Anti-AFK:
     TotalClientsOnAFKList := AFKList.MaxIndex()
     Loop, %TotalClientsOnAFKList%
 	{
-		ModifyListView("FishingList", AFKList[a_index, 1], 2, "0")
-		ModifyListView("FishingList", AFKList[a_index, 1], 3, "Unknown")
-		ModifyListView("FishingList", AFKList[a_index, 1], 4, "Anti-AFK")
+		FormatTime, AFKStartTime, AFKList[a_index][3], dd.MM.yyyy HH:mm:ss
+		ModifyListView("FishingList", AFKList[a_index, 1], 3, "0")
+		ModifyListView("FishingList", AFKList[a_index, 1], 4, "Unknown")
+		ModifyListView("FishingList", AFKList[a_index, 1], 5, "Anti-AFK")
+		ModifyListView("FishingList", AFKList[a_index, 1], 6, AFKStartTime)
 		HumanPressButton("rctrl", AFKList[a_index, 2])
 	}
 Return
 
 FishingStopAll:
-	log("Stopping fishing on all accounts...", TimeStamp, LogPath)
+	log("Stopping fishing on all accounts...", LogPath)
 	CheckSetTimer := 0
 	SetTimer, FishBiteMemoryScan, Off
 	SetTimer, Recast, Off
@@ -262,13 +279,15 @@ FishingStopAll:
 		IniRead, GetFMode, %A_ScriptDir%/data/savedlogins/%A_LoopFileName%/Fishing.ini, Fishing, Mode
 		if (GetFMode = "On")
 		{
-			ModifyListView("FishingList", A_LoopFileName, 2, "0")
-			ModifyListView("FishingList", A_LoopFileName, 3, "Unknown")
-			ModifyListView("FishingList", A_LoopFileName, 4, "Idle")
-			log("Stopped fishing for: " . A_LoopFileName, TimeStamp, LogPath)
+			ModifyListView("FishingList", A_LoopFileName, 2, "Unknown")
+			ModifyListView("FishingList", A_LoopFileName, 3, "0")
+			ModifyListView("FishingList", A_LoopFileName, 4, "Unknown")
+			ModifyListView("FishingList", A_LoopFileName, 5, "Idle")
+			ModifyListView("FishingList", A_LoopFileName, 6, "Unknown")
+			log("Stopped fishing for: " . A_LoopFileName, LogPath)
 		}
 	}
-	log("Stopped all fishing accounts.", TimeStamp, LogPath)
+	log("Stopped fishing on all accounts.", LogPath)
 Return
 
 FishingStartSelected:
@@ -285,12 +304,12 @@ FishingStartSelected:
 	if not FocusedRowNumber  ; No row is focused.
     {
 		; SB_SetText("Error: Fail to remove selceted account (See log for details).", 2)
-		log("Fail to start fishing on the selected account: you haven't select any account yet.", TimeStamp, LogPath)
+		log("Fail to start fishing on the selected account: you haven't select any account yet.", LogPath)
 		; SB_SetText("", 2)
 		Return
 	}
 	LV_GetText(LoginName, FocusedRowNumber, 1)
-	log("Starting fishing for: " . LoginName . " ...", TimeStamp, LogPath)
+	log("Starting fishing for: " . LoginName . " ...", LogPath)
 	
 	TotalClientsOnAFKList := AFKList.MaxIndex()
     Loop, %TotalClientsOnAFKList%
@@ -352,10 +371,12 @@ FishingStartSelected:
 	{
 		LiquidType = Unknown
 	}
-	
-	ModifyListView("FishingList", LoginName, 3, LiquidType)
-	ModifyListView("FishingList", LoginName, 4, "Fishing")
-	log("Fishing started for " . LoginName, TimeStamp, LogPath)
+	FormatTime, FishingStartTime, StartTime, dd.MM.yyyy HH:mm:ss
+	ModifyListView("FishingList", LoginName, 2, FishingStartTime)
+	ModifyListView("FishingList", LoginName, 4, LiquidType)
+	ModifyListView("FishingList", LoginName, 5, "Fishing")
+	ModifyListView("FishingList", LoginName, 6, "Unknown")
+	log("Fishing started for " . LoginName, LogPath)
 Return
 
 FishingStopSelected:
@@ -365,25 +386,27 @@ FishingStopSelected:
 	if not FocusedRowNumber  ; No row is focused.
     {
 		; SB_SetText("Error: Fail to remove selceted account (See log for details).", 2)
-		log("Fail to start fishing on the selected account: you haven't select any account yet.", TimeStamp, LogPath)
+		log("Fail to start fishing on the selected account: you haven't select any account yet.", LogPath)
 		; SB_SetText("", 2)
 		Return
 	}
 	LV_GetText(LoginName, FocusedRowNumber, 1)
-	
-	ModifyListView("FishingList", LoginName, 2, "0")
-	ModifyListView("FishingList", LoginName, 3, "Unkown")
-	ModifyListView("FishingList", LoginName, 4, "Idle")
 	
 	TotalClientsOnList := BotList.MaxIndex()
 	Loop, %TotalClientsOnList%
 	{
 		if (BotList[a_index, 15] = LoginName)
 		{
-			log("Stopped fishing for " . BotList[a_index, 15], TimeStamp, LogPath)
+			log("Stopped fishing for " . BotList[a_index, 15], LogPath)
 			BotList.Remove(a_index)
 		}
 	}
+	
+	ModifyListView("FishingList", LoginName, 2, "Unknown")
+	ModifyListView("FishingList", LoginName, 3, "0")
+	ModifyListView("FishingList", LoginName, 4, "Unkown")
+	ModifyListView("FishingList", LoginName, 5, "Idle")
+	ModifyListView("FishingList", LoginName, 6, "Unknown")
 	
 	if (TotalClientsOnList = 0)
 	{
@@ -397,27 +420,12 @@ Return
 ; Button Setting Save
 FishingSettingSave:
 	GuiControlGet, Address
+	GuiControlGet, ScanTime
 	
 	IniWrite, %Address%, %A_ScriptDir%/data/configs/fishingsystem.ini, MemoryAddress, Address
-	
-	; SB_SetText("Successfully saved fishing address.", 2)
-	log("Saved fishing address for Fishing Bot. New address is: " . Address, TimeStamp, LogPath)
-	; SB_SetText("", 2)
-Return
+	IniWrite, %ScanTime%, %A_ScriptDir%/data/configs/fishingsystem.ini, TimeBeforeScan, Time
+	IniRead, LoadAddress, %A_ScriptDir%/data/configs/fishingsystem.ini, MemoryAddress, Address
+	IniRead, LoadScanTime, %A_ScriptDir%/data/configs/fishingsystem.ini, TimeBeforeScan, Time
 
-; Reload Fishing List Function.
-FishingListReload()
-{
-	Gui, Main:Default
-	Gui, Main:ListView, FishingList
-	LV_Delete()
-	loop, %A_ScriptDir%\data\savedlogins\*, 2
-	{
-		IniRead, FMode, %A_ScriptDir%/data/savedlogins/%A_LoopFileName%/Fishing.ini, Fishing, Mode
-		if (FMode = "On")
-		{
-			LV_Add("", A_LoopFileName, "0", "Unknown", "Idle")
-		}
-	}
-	Return
-}
+	log("Saved fishing address for Fishing Bot. New address is: " . Address . " and time before scan start is: " . ScanTime, LogPath)
+Return

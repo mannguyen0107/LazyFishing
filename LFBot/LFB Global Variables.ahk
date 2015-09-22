@@ -1,5 +1,4 @@
-﻿Global BotVer := "1.7.2"
-Global BDActive
+﻿Global BotVer := "1.8"
 Global ClientWidth
 Global ClientHeight
 Global StandaloneDataPath := LOCALAPPDATA . "\Glyph\"
@@ -8,5 +7,5 @@ Global CheckSetTimer := 0
 Global BotList := Object() ;The array where the clients are added.
 Global SelectedSlots := Object()
 Global AFKList := Object()
-Global SDTimesec
-Global SDActive
+Global SDActive := 0
+Global LaunchGlyphFail

@@ -1,4 +1,21 @@
-﻿GetAddressWater(PID, Base, Address)
+﻿; Reload Fishing List Function.
+FishingListReload()
+{
+	Gui, Main:Default
+	Gui, Main:ListView, FishingList
+	LV_Delete()
+	loop, %A_ScriptDir%\data\savedlogins\*, 2
+	{
+		IniRead, FMode, %A_ScriptDir%/data/savedlogins/%A_LoopFileName%/Fishing.ini, Fishing, Mode
+		if (FMode = "On")
+		{
+			LV_Add("", A_LoopFileName, "Unknown", "0", "Unknown", "Idle", "Unknown")
+		}
+	}
+	Return
+}
+
+GetAddressWater(PID, Base, Address)
 {
     pointerBase := base + Address
     y1 := ReadMemory(PID, pointerBase)
