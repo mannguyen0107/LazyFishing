@@ -156,17 +156,12 @@
 
 	> If you want to check on all of your bot accounts without the need of looking at your
 	computer then:
-		* Go to PushBullet website at (https://www.pushbullet.com) and register.
-		* Download PushBullet app on your smart phone.
-		* Login to PushBullet on your smartphone.
-		* Go to your browser and login into PushBullet website. Then go to settings and
-		under Account you should see Access Token.
-		* Copy the Access Token and paste it to the Access Token in Notify Tab of 
-		LazyFishing.
-		* Change the settings of the Notification system to your liking and click on
-		Save Settings.
-		* Click on Test Token and wait abit to see if you receive a new note on PushBullet.
-		If you do receive it that means your token is working. If you DO NOT receive any new
-		note then go to the Log Screen and check out what's going on.
-		* Now after set everything up just click Enable.
-
+	
+	> * Go to [PushBullet website](https://www.pushbullet.com) and register.
+	> * Download PushBullet app on your smart phone.
+	> * Login to PushBullet on your smartphone.
+	> * Go to your browser and login into PushBullet website. Then go to settings and under Account you should see Access Token.
+	> * Copy the Access Token and paste it to the Access Token in Notify Tab of LazyFishing.
+	> * Change the settings of the Notification system to your liking and click on Save Settings.
+	> * Click on Test Token and wait abit to see if you receive a new note on PushBullet. If you do receive it that means your token is working. If you DO NOT receive any new note then go to the Log Screen and check out what's going on.
+	> * Now after set everything up just click Enable.
