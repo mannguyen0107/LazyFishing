@@ -25,7 +25,13 @@ IfNotExist, %A_ScriptDir%/data/configs/loginsystem.ini
 IfNotExist, %A_ScriptDir%/data/configs/fishingsystem.ini
 {
 	;Default Settings for Fishing Sytem.
-	IniWrite, 0x00ACA8DC, %A_ScriptDir%/data/configs/fishingsystem.ini, MemoryAddress, Address
+	IniWrite, 0x00AAB440, %A_ScriptDir%/data/configs/fishingsystem.ini, MemoryAddress, Address
+	IniWrite, 0x144+0xe4+0x70, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Water
+	IniWrite, 0x144+0xe4+0x514, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Lava
+	IniWrite, 0x144+0xe4+0x2c0, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Choco
+	IniWrite, 0x604+0x7d4+0x28+0x524, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Water
+	IniWrite, 0x604+0x7d4+0x48c+0x3e0, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Lava
+	IniWrite, 0x604+0x7d4+0x3c8+0xfc, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Choco
 	IniWrite, 12, %A_ScriptDir%/data/configs/fishingsystem.ini, TimeBeforeScan, Time
 }
 

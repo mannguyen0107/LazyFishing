@@ -26,6 +26,29 @@ Gui, Main:Show, x0 y0 w730 h430, LazyFishing v%BotVer%
 FormatTime, LogFileName, A_Now, dd.MM.yyyy-HH.mm.ss
 LogPath := % A_ScriptDir . "\data\log\" . LogFileName . ".txt"
 log("Started LazyFishing Bot v" . BotVer, LogPath)
+
+Loop, %A_ScriptDir%\data\log\*
+{
+	LogFileCount++
+}
+if (LogFileCount > 10)
+{
+	log("Log folder has more than 10 log files. Auto clean log folder will be active.", LogPath)
+	Loop, %A_ScriptDir%\data\log\*
+	{
+		CurrentLogFileName := LogFileName . ".txt"
+		if (A_LoopFileName = CurrentLogFileName)
+		{
+			Continue
+		}
+		else
+		{
+			FileDelete, %A_ScriptDir%\data\log\%A_LoopFileName%
+		}
+	}
+	log("Log folder is cleaned.", LogPath)
+}
+
 return
 
 CheckCPU:
@@ -37,7 +60,7 @@ Return
 
 #Include %A_ScriptDir%/LFBot/LFB Functions.ahk
 
-^+Q::
+^+R::
 	Reload
 Return
 

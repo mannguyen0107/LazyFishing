@@ -32,15 +32,9 @@ Gui, Main:Tab, 3
 Gui, Main:Add, ListView, x30 y140 w670 h140 NoSortHdr Grid -Multi vFishingList, Account Name|Start Time|Reel In|Fish In|Status|AFK Start Time
 Gui, Main:Add, Button, x30 y290 w190 h40 gFishingStartAll, Fishing Start All
 Gui, Main:Add, Button, x30 y340 w190 h40 gFishingStopAll, Fishing Stop All
-Gui, Main:Add, Button, x255 y290 w190 h40 gFishingStartSelected, Fishing Start Selected
-Gui, Main:Add, Button, x255 y340 w190 h40 gFishingStopSelected, Fishing Stop Selected
-Gui, Main:Add, GroupBox, x480 y284 w220 h97 E0x00000020
-Gui, Main:Add, Text, x490 y300 w60 BackgroundTrans E0x00000020, Address:
-Gui, Main:Add, Edit, x590 y299 w100 h20 +Center vAddress
-Gui, Main:Add, Text, x490 y327 w90 BackgroundTrans E0x00000020, Scan Start At:
-Gui, Main:Add, Edit, x590 y325 w40 h20 +Center vScanTime
-Gui, Main:Add, Text, x635 y326 w90 BackgroundTrans E0x00000020, seconds
-Gui, Main:Add, Button, x537 y352 w100 h20 gFishingSettingSave, Save Settings
+Gui, Main:Add, Button, x270 y290 w190 h40 gFishingStartSelected, Fishing Start Selected
+Gui, Main:Add, Button, x270 y340 w190 h40 gFishingStopSelected, Fishing Stop Selected
+Gui, Main:Add, Button, x510 y290 w190 h40 gFishingSetting, Settings
 
 ; Boot/Decons Tab
 Gui, Main:Tab, 4

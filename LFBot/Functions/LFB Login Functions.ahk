@@ -55,11 +55,10 @@ LaunchGlyph(GlyphPath)
 ; Click Play Function.
 ClickPlay()
 {
-	Global TimeStamp
 	Global LogPath
 	log("Waiting to click Play button...", LogPath)
 	; Click on Play
-	ToolTip, "If your mouse get frozen it is because the bot cannot find the Play button`n then please use Ctrl+Shift+Q to reload and check your settings again."
+	ToolTip, "If your mouse get frozen it is because the bot cannot find the Play button`n then please use Ctrl+Shift+R to reload and check your settings again."
 	Loop
 	{
 		WinActivate, Glyph
@@ -76,7 +75,6 @@ ClickPlay()
 
 SetWinTitleAtLaunch(LoginName)
 {
-	Global TimeStamp
 	Global LogPath
 	log("Renaming Trove window to the account name: " . LoginName . " ...", LogPath)
 	Global ClientWidth

@@ -29,9 +29,13 @@ LV_ModifyCol(2, "Center")
 
 ; Fishing List
 IniRead, LoadAddress, %A_ScriptDir%/data/configs/fishingsystem.ini, MemoryAddress, Address
+IniRead, LoadFishBiteWaterOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Water
+IniRead, LoadFishBiteLavaOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Lava
+IniRead, LoadFishBiteChocoOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Choco
+IniRead, LoadLiquidTypeWaterOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Water
+IniRead, LoadLiquidTypeLavaOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Lava
+IniRead, LoadLiquidTypeChocoOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Choco
 IniRead, LoadScanTime, %A_ScriptDir%/data/configs/fishingsystem.ini, TimeBeforeScan, Time
-GuiControl, Main:, Address, %LoadAddress%
-GuiControl, Main:, ScanTime, %LoadScanTime%
 FishingListReload()
 Gui, Main:ListView, FishingList
 LV_ModifyCol(1, "Center")

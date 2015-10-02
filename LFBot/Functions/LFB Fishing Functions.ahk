@@ -15,58 +15,31 @@ FishingListReload()
 	Return
 }
 
-GetAddressWater(PID, Base, Address)
+GetAddress(PID, Base, Address, Offset)  
 {
-    pointerBase := base + Address
-    y1 := ReadMemory(PID, pointerBase)
-    y2 := ReadMemory(PID, y1 + 0x144)
-    y3 := ReadMemory(PID, y2 + 0xe4)
-    Return @ := (y3 + 0x70)   
-}
-
-GetAddressLava(PID, Base, Address)
-{
-	pointerBase := base + Address
-	y1 := ReadMemory(PID, pointerBase)
-	y2 := ReadMemory(PID, y1 + 0x144)
-	y3 := ReadMemory(PID, y2 + 0xe4)
-	Return @ := (y3 + 0x514) 
-}
-
-GetAddressChoco(PID, Base, Address)
-{
-	pointerBase := base + Address
-	y1 := ReadMemory(PID, pointerBase)
-	y2 := ReadMemory(PID, y1 + 0x144)
-	y3 := ReadMemory(PID, y2 + 0xe4)
-	Return @ := (y3 + 0x2c0)
-}  
-
-GetFishingStateWaterAddress(PID, Base, Address)
-{
-	pointerBase := base + Address
-	y1 := ReadMemory(PID, pointerBase)
-	y2 := ReadMemory(PID, y1 + 0x5d8)
-	y3 := ReadMemory(PID, y2 + 0x7d4)
-	Return @ := (y3 + 0x5a0)
-}
- 
-GetFishingStateChocoAddress(PID, Base, Address)
-{
-	pointerBase := base + Address
-	y1 := ReadMemory(PID, pointerBase)
-	y2 := ReadMemory(PID, y1 + 0x5d8)
-	y3 := ReadMemory(PID, y2 + 0x7d8)
-	Return @ := (y3 + 0x684)
-}
- 
-GetFishingStateLavaAddress(PID, Base, Address)
-{
-	pointerBase := base + Address
-	y1 := ReadMemory(PID, pointerBase)
-	y2 := ReadMemory(PID, y1 + 0x5d8)
-	y3 := ReadMemory(PID, y2 + 0x7d8)
-	Return @ := (y3 + 0x1e4)
+	pointerBase := Base + Address
+	y := ReadMemory(PID, pointerBase)       
+	OffsetSplit := StrSplit(Offset, "+")
+	OffsetCount := OffsetSplit.MaxIndex()
+	Loop, %OffsetCount%
+	{
+		if (a_index = OffsetCount) 
+		{
+			Address := (y + OffsetSplit[a_index])
+		} 
+		else
+		{
+			if(a_index = 1) {
+				y := ReadMemory(PID, y + OffsetSplit[a_index])
+			} 
+			else 
+			{
+				y := ReadMemory(PID, y + OffsetSplit[a_index])
+			}
+			 
+		}
+	}
+	Return Address
 }
 
 getProcessBaseAddress(Handle)
@@ -90,4 +63,47 @@ ReadMemory(PID, MADDRESS)
 		result += *(&MVALUE + A_Index-1) << 8*(A_Index-1)
 	}
 	Return result
+}
+
+Help() {
+	ToolTip 
+
+	CurrControl := A_GuiControl 
+
+	IfEqual, CurrControl, FishingSettingHelp1
+	{
+		Help := "This is the fishing base address this address will change everytime`nTrove update. Thus everytime Trove update please go onto the forum`nto check for new address."
+	}
+	else IfEqual, CurrControl, FishingSettingHelp2
+	{
+		Help := "This is the time before the checking for fishing bite start. It is`nused for reduce CPU usage purpose. Default: 12 seconds"
+	}
+	else IfEqual, CurrControl, FishingSettingHelp3
+	{
+		Help := "This is the offset for checking fish bite in water. It might or`nmight not changes when Trove update. Hence, please check`nthe forum for more info."
+	}
+	else IfEqual, CurrControl, FishingSettingHelp4
+	{
+		Help := "This is the offset for checking fish bite in lava. It might or`nmight not changes when Trove update. Hence, please check`nthe forum for more info."
+	}
+	else IfEqual, CurrControl, FishingSettingHelp5
+	{
+		Help := "This is the offset for checking fish bite in Chocolate. It might`nor might not changes when Trove update. Hence, please check`nthe forum for more info."
+	}
+	else IfEqual, CurrControl, FishingSettingHelp6
+	{
+		Help := "This is the offset for checking fishing in water. It might or`nmight not changes when Trove update. Hence, please check`nthe forum for more info."
+	}
+	else IfEqual, CurrControl, FishingSettingHelp7
+	{
+		Help := "This is the offset for checking fishing in lava. It might or`nmight not changes when Trove update. Hence, please check`nthe forum for more info."
+	}
+	else IfEqual, CurrControl, FishingSettingHelp8
+	{
+		Help := "This is the offset for checking fishing in Chocolate. It might`nor might not changes when Trove update. Hence, please check`nthe forum for more info."
+	}
+
+	ToolTip % Help
+	
+	Return
 }

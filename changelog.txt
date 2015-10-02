@@ -101,3 +101,6 @@ v1.8:
 - Separate boot drop and decons out from the main script so it doesnt conflict with fishing bot.
 - Fixed how the bot reload fishing list when you add a new account that it could make the fishing info of current account get reset.
 - Fixed log screen timer, it will now shows the correct time.
+v1.9:
+- Added settings GUI for Fishing Bot. You are now be able to update the offsets and address by yourself.
+- Added auto clean log folders if there are more than 10 log files.

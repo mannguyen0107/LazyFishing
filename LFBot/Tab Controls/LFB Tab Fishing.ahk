@@ -46,15 +46,15 @@
 			Sleep 400
 			
 			Base := getProcessBaseAddress(Handle)
-			WaterAddress := GetAddressWater(PID, Base, LoadAddress)
+			WaterAddress := GetAddress(PID, Base, LoadAddress, LoadFishBiteWaterOffsets)
 			Sleep 100
-			LavaAddress := GetAddressLava(PID, Base, LoadAddress)
-			ChocoAddress := GetAddressChoco(PID, Base, LoadAddress)
+			LavaAddress := GetAddress(PID, Base, LoadAddress, LoadFishBiteLavaOffsets)
+			ChocoAddress := GetAddress(PID, Base, LoadAddress, LoadFishBiteChocoOffsets)
 			Sleep 100
-			GetFishingStateWaterAddress := GetFishingStateWaterAddress(PID, Base, LoadAddress)
-			GetFishingStateLavaAddress := GetFishingStateLavaAddress(PID, Base, LoadAddress)
+			GetFishingStateWaterAddress := GetAddress(PID, Base, LoadAddress, LoadLiquidTypeWaterOffsets)
+			GetFishingStateLavaAddress := GetAddress(PID, Base, LoadAddress, LoadLiquidTypeLavaOffsets)
 			Sleep 100
-			GetFishingStateChocoAddress := GetFishingStateChocoAddress(PID, Base, LoadAddress)
+			GetFishingStateChocoAddress := GetAddress(PID, Base, LoadAddress, LoadLiquidTypeChocoOffsets)
 			Sleep 200
 			
 			;Detecting Liquid type via memory read.
@@ -182,7 +182,7 @@ FishBiteMemoryScan:
 			}
 
 			;Memory scan for current client to check for fish bite
-			If (LoadScanTime < CurrentTime) ;Wont start a memory scan till 12Seconds has passed. This is to Lower cpu usage.
+			If (CurrentTime > LoadScanTime)
 			{
 				If (BotList[this_index, 12] = 1) ;Water type found scan only water type
 				{
@@ -328,16 +328,16 @@ FishingStartSelected:
 	HumanPressButton("f", PID)
 	
 	;Setting up addresses for Memory scan
-    Base := getProcessBaseAddress(Handle)
-    WaterAddress := GetAddressWater(PID, Base, LoadAddress)
-    Sleep 200
-    LavaAddress := GetAddressLava(PID, Base, LoadAddress)
-    ChocoAddress := GetAddressChoco(PID, Base, LoadAddress)
-    Sleep 200
-    GetFishingStateWaterAddress := GetFishingStateWaterAddress(PID, Base, LoadAddress)
-    GetFishingStateLavaAddress := GetFishingStateLavaAddress(PID, Base, LoadAddress)
-    Sleep 200
-    GetFishingStateChocoAddress := GetFishingStateChocoAddress(PID, Base, LoadAddress)
+	Base := getProcessBaseAddress(Handle)
+	WaterAddress := GetAddress(PID, Base, LoadAddress, LoadFishBiteWaterOffsets)
+	Sleep 200
+	LavaAddress := GetAddress(PID, Base, LoadAddress, LoadFishBiteLavaOffsets)
+	ChocoAddress := GetAddress(PID, Base, LoadAddress, LoadFishBiteChocoOffsets)
+	Sleep 200
+	GetFishingStateWaterAddress := GetAddress(PID, Base, LoadAddress, LoadLiquidTypeWaterOffsets)
+	GetFishingStateLavaAddress := GetAddress(PID, Base, LoadAddress, LoadLiquidTypeLavaOffsets)
+	Sleep 200
+	GetFishingStateChocoAddress := GetAddress(PID, Base, LoadAddress, LoadLiquidTypeChocoOffsets)
 	
 	;Detecting Liquid type via memory read.
     DetectedLiquidType := 0 ;Default = for unknown type.
@@ -417,15 +417,64 @@ FishingStopSelected:
 	}
 Return
 
+FishingSetting:
+	Gui, FishingSetting:Show, x180 y0 w380 h380, Fishing Settings
+	OnMessage(0x200, "Help")
+	
+	IniRead, LoadAddress, %A_ScriptDir%/data/configs/fishingsystem.ini, MemoryAddress, Address
+	IniRead, LoadFishBiteWaterOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Water
+	IniRead, LoadFishBiteLavaOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Lava
+	IniRead, LoadFishBiteChocoOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Choco
+	IniRead, LoadLiquidTypeWaterOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Water
+	IniRead, LoadLiquidTypeLavaOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Lava
+	IniRead, LoadLiquidTypeChocoOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Choco
+	IniRead, LoadScanTime, %A_ScriptDir%/data/configs/fishingsystem.ini, TimeBeforeScan, Time
+	GuiControl, FishingSetting:, Address, %LoadAddress%
+	GuiControl, FishingSetting:, FishBiteWaterOffsets, %LoadFishBiteWaterOffsets%
+	GuiControl, FishingSetting:, FishBiteLavaOffsets, %LoadFishBiteLavaOffsets%
+	GuiControl, FishingSetting:, FishBiteChocoOffsets, %LoadFishBiteChocoOffsets%
+	GuiControl, FishingSetting:, LiquidTypeWaterOffsets, %LoadLiquidTypeWaterOffsets%
+	GuiControl, FishingSetting:, LiquidTypeLavaOffsets, %LoadLiquidTypeLavaOffsets%
+	GuiControl, FishingSetting:, LiquidTypeChocoOffsets, %LoadLiquidTypeChocoOffsets%
+	GuiControl, FishingSetting:, ScanTime, %LoadScanTime%
+Return
+
 ; Button Setting Save
 FishingSettingSave:
 	GuiControlGet, Address
+	GuiControlGet, FishBiteWaterOffsets
+	GuiControlGet, FishBiteLavaOffsets
+	GuiControlGet, FishBiteChocoOffsets
+	GuiControlGet, LiquidTypeWaterOffsets
+	GuiControlGet, LiquidTypeLavaOffsets
+	GuiControlGet, LiquidTypeChocoOffsets
 	GuiControlGet, ScanTime
 	
 	IniWrite, %Address%, %A_ScriptDir%/data/configs/fishingsystem.ini, MemoryAddress, Address
+	IniWrite, %FishBiteWaterOffsets%, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Water
+	IniWrite, %FishBiteLavaOffsets%, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Lava
+	IniWrite, %FishBiteChocoOffsets%, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Choco
+	IniWrite, %LiquidTypeWaterOffsets%, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Water
+	IniWrite, %LiquidTypeLavaOffsets%, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Lava
+	IniWrite, %LiquidTypeChocoOffsets%, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Choco
 	IniWrite, %ScanTime%, %A_ScriptDir%/data/configs/fishingsystem.ini, TimeBeforeScan, Time
+	
 	IniRead, LoadAddress, %A_ScriptDir%/data/configs/fishingsystem.ini, MemoryAddress, Address
+	IniRead, LoadFishBiteWaterOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Water
+	IniRead, LoadFishBiteLavaOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Lava
+	IniRead, LoadFishBiteChocoOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, FishBiteOffsets, Choco
+	IniRead, LoadLiquidTypeWaterOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Water
+	IniRead, LoadLiquidTypeLavaOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Lava
+	IniRead, LoadLiquidTypeChocoOffsets, %A_ScriptDir%/data/configs/fishingsystem.ini, LiquidTypeOffsets, Choco
 	IniRead, LoadScanTime, %A_ScriptDir%/data/configs/fishingsystem.ini, TimeBeforeScan, Time
 
-	log("Saved fishing address for Fishing Bot. New address is: " . Address . " and time before scan start is: " . ScanTime, LogPath)
+	Gui, FishingSetting:Hide
+	MsgBox, 64, Fishing Settings, Settings are successfully saved.
+Return
+
+FishingSettingCancel:
+	Gui, FishingSetting:Hide
+Return
+
+Help:
 Return
