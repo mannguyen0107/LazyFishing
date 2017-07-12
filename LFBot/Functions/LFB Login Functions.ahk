@@ -67,6 +67,7 @@ ClickPlay()
 		{
 			ToolTip
 			Break
+			sleep, 12000
 		}
 	}
 	log("Done. Play button has clicked, the game has launch.", LogPath)
