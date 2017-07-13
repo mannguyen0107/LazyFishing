@@ -1,4 +1,4 @@
-﻿Gui, Main:Default
+Gui, Main:Default
 Gui, Main:Font, S9 Q4, Verdana
 Gui, Main:Add, GroupBox, x10 y10 w710 r3
 Gui, Main:Add, Picture, x155 y22 w438 h63 BackgroundTrans, %A_ScriptDir%/data/img/launcher/banner.png
@@ -65,6 +65,8 @@ Gui, Main:Add, Button, x200 y330 w100 h30 gSDStop, Stop
 Gui, Main:Add, Text, x360 y150 BackgroundTrans E0x00000020, Ultilities Buttons
 Gui, Main:Add, GroupBox, x360 y160 w300 h220 E0x00000020
 Gui, Main:Add, Button, x380 y180 w140 h30 gResize, Resize All Windows
+Gui, Main:Add, Button, x380 y230 w135 h45 gStartonstart, Enable Auto Start LazyFishing On Computer Bootup
+Gui, Main:Add, Button, x520 y230 w135 h45 gDisableonstart, Disable Auto Start LazyFishing On Computer Bootup
 
 
 ; Notification Tab
