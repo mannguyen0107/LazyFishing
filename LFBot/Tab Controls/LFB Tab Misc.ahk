@@ -1,4 +1,4 @@
-﻿SDStart:
+SDStart:
 	SDActive := 1
 	GuiControlGet, SDHour
 	GuiControlGet, SDMin
@@ -63,3 +63,15 @@ Resize:
 		WinMove, ahk_pid %PID%, , , , %ClientWidth%, %ClientHeight%
 	}
 Return
+
+Startonstart:
+        FileCreateShortcut, %A_ScriptDir%\LazyFishing.ahk, %appdata%\Microsoft\Windows\Start Menu\Programs\Startup\lazyfishing.lnk
+	msgbox, 0, Enabled Auto Start., Setting Saved Successfully.
+	log("LazyFishing will now open automatically next time you start your computer", LogPath)
+Return   
+
+Disableonstart:
+        FileDelete, %appdata%\Microsoft\Windows\Start Menu\Programs\Startup\lazyfishing.lnk
+	msgbox, 0, Disabled Auto Start, Setting Saved Successfully.
+	log("Disbaled auto start of LazyFishing", LogPath)
+Return 
