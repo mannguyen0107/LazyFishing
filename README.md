@@ -1,3 +1,5 @@
+# THIS DOESN'T WORK ANYMORE BECAUSE THE MEMORY ADDRESS IS WRONG IF YOU WANT TO USE IT UPDATE THE MEMORY ADDRESS
+
 # LazyFishing
 ![preview](https://raw.githubusercontent.com/mannguyen0107/LazyFishing/master/preview.gif)
 
